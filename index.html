@@ -76,14 +76,13 @@
             <p class="text-amber-300/80">التطبيق محلي تماماً ويعتمد على مفتاحك الشخصي لضمان الخصوصية التامة.</p>
         </div>
 
-        <!-- Upload Card (نافذة رفع الصور بعد انتهاء المزامنة) -->
+        <!-- Upload Card -->
         <div class="glass border border-slate-800 rounded-3xl p-5 shadow-2xl flex flex-col gap-4">
             <div class="text-center">
                 <h2 class="text-base font-bold text-slate-200">أرسل صور الموضوع أو التمرين</h2>
                 <p class="text-xs text-slate-400 mt-1">الدروس جاهزة ومحدثة للعمل الفوري</p>
             </div>
 
-            <!-- Drag & Drop Dropzone -->
             <label for="image-input" id="dropzone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500/60 transition rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-900/40 hover:bg-slate-900/80 group">
                 <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition shadow-inner">
                     📁
@@ -93,16 +92,14 @@
                 <input type="file" id="image-input" accept="image/*" multiple class="hidden">
             </label>
 
-            <!-- Selected Images Preview Container -->
             <div id="preview-container" class="hidden grid grid-cols-4 gap-2 max-h-40 overflow-y-auto p-1"></div>
 
-            <!-- Action Button -->
             <button id="solve-btn" disabled class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed text-white font-bold rounded-2xl transition shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2">
                 <span>✨ ابدأ حل الموضوع</span>
             </button>
         </div>
 
-        <!-- Progress / Status Card -->
+        <!-- Status Card -->
         <div id="status-card" class="hidden glass border border-slate-800 rounded-3xl p-5 flex flex-col gap-4">
             <div class="flex items-center justify-between">
                 <span id="status-title" class="text-xs font-bold text-emerald-400 flex items-center gap-2">
@@ -159,14 +156,12 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // Telegram Web App Initialization
         const tg = window.Telegram?.WebApp;
         if (tg) {
             tg.ready();
             tg.expand();
         }
 
-        // ==================== إعدادات الـ CDN (jsDelivr) ====================
         const GITHUB_USER = "Raoufsb";    
         const REPO_NAME = "BacIslam-AI";  
 
@@ -175,7 +170,6 @@
 
         let LESSONS = [];
 
-        // دالة مقارنة الإصدارات (تُرجع true إذا كان remoteVersion أعلى من localVersion)
         function isNewerVersion(remote, local) {
             if (!local || local === "0") return true;
             const rParts = remote.split('.').map(Number);
@@ -189,7 +183,6 @@
             return false;
         }
 
-        // دالة قراءة ومعالجة ملفات الدروس من الـ ZIP
         async function loadLessonsFromZip(zipBlob) {
             const zip = new JSZip();
             const contents = await zip.loadAsync(zipBlob);
@@ -217,7 +210,6 @@
             return loadedLessons;
         }
 
-        // نظام الفحص والتحديث والتحكم بنافذة الانتظار
         async function initLessonsSync() {
             const syncModal = document.getElementById('sync-modal');
             const syncModalText = document.getElementById('sync-modal-text');
@@ -226,23 +218,20 @@
             try {
                 syncModalText.innerText = "🔍 جاري التحقق من إصدار الدروس...";
                 
-                // جلب الإصدار الحالي المخزن (افتراضياً 0)
                 const localVersion = localStorage.getItem('lessons_version') || "0";
-                
-                // جلب الإصدار من جيت هب
                 let remoteVersion = "1.0.0";
+                
                 try {
                     const verRes = await fetch(VERSION_URL + "?t=" + Date.now());
                     if (verRes.ok) {
                         remoteVersion = (await verRes.text()).trim();
                     }
                 } catch (e) {
-                    console.warn("فشل الاتصال بالخترنت لجلب الإصدار، سيتم الاعتماد على النسخة المحلية.");
+                    console.warn("فشل الاتصال لجلب الإصدار، سيتم الاعتماد على النسخة المحلية.");
                 }
 
                 const cachedLessons = localStorage.getItem('cached_lessons');
 
-                // التحقق هل يلزم التحديث (الإصدار الجديد أعلى أو لا توجد دروس مخزنة)
                 if (!cachedLessons || isNewerVersion(remoteVersion, localVersion)) {
                     syncModalText.innerText = `📥 يتوفر إصدار جديد (${remoteVersion}). جاري تحميل دروس.zip...`;
                     
@@ -253,7 +242,6 @@
                     syncModalText.innerText = "⚙️ جاري فك ضغط وقراءة الدروس...";
                     LESSONS = await loadLessonsFromZip(zipBlob);
 
-                    // تخزين الإصدار والدروس محلياً
                     localStorage.setItem('cached_lessons', JSON.stringify(LESSONS));
                     localStorage.setItem('lessons_version', remoteVersion);
                     headerStatus.innerText = `جاهز (${LESSONS.length} درس - v${remoteVersion})`;
@@ -262,7 +250,6 @@
                     headerStatus.innerText = `جاهز (${LESSONS.length} درس موازن)`;
                 }
 
-                // إخفاء نافذة الانتظار وفتح واجهة رفع الصور عند الانتهاء تماماً
                 setTimeout(() => {
                     syncModal.classList.add('hidden');
                 }, 400);
@@ -284,7 +271,6 @@
             await initLessonsSync();
         });
 
-        // ==================== البرومتات (مطابقة لبايثون) ====================
         const READ_SYSTEM = `أنت تقرأ صور موضوع امتحان (أو تمرين) في مادة العلوم الإسلامية. قد تحوي الصور موضوعاً كاملاً بعدة تمارين، أو تمريناً واحداً، أو جزءاً من صفحة.
 مهمتك: استخراج كل تمرين على حدة، وإخراجه بصيغة JSON فقط:
 {"exercises": [{"label": "...", "text": "..."}], "note": "..."}
@@ -427,7 +413,8 @@
                 return;
             }
 
-            const ai = new GoogleGenAI({ apiKey: apiKey });
+            // تم إصلاح إصدار الـ API ليدعم v1beta وتعيين النموذج الصحيح
+            const ai = new GoogleGenAI({ apiKey: apiKey, apiVersion: 'v1beta' });
             const modelName = 'gemini-3.5-flash-lite';
 
             statusCard.classList.remove('hidden');
@@ -558,3 +545,4 @@
     </script>
 </body>
 </html>
+   
