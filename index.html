@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مصحح ومحلل مواضيع الشريعة</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- JSZip Library لمعالجة ملفات الـ zip في المتصفح -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Google GenAI SDK (ES Module) -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.run/@google/genai"
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow { animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+
+    <!-- Top Header -->
+    <header class="w-full border-b border-slate-800/80 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3 space-x-reverse">
+            <div class="w-9 h-9 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-lg">
+                📚
+            </div>
+            <div>
+                <h1 class="font-bold text-sm text-slate-200">المرشد الشرعي للبكالوريا</h1>
+                <p id="sync-status" class="text-[10px] text-emerald-400">جاري تحميل الدروس...</p>
+            </div>
+        </div>
+        <button id="settings-btn" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-sm flex items-center gap-1.5 border border-slate-700/50">
+            <span>⚙️</span>
+            <span class="text-xs">الإعدادات</span>
+        </button>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-xl w-full mx-auto p-4 flex-grow flex flex-col gap-5">
+
+        <!-- API Key Banner -->
+        <div id="api-key-banner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-200 flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+                <span class="font-bold flex items-center gap-1.5">⚠️ مفتاح Gemini API مفقود</span>
+                <button id="open-settings-inline" class="underline font-semibold hover:text-white">إدخاله الآن</button>
+            </div>
+            <p class="text-amber-300/80">التطبيق محلي تماماً ويعتمد على مفتاحك الشخصي لضمان الخصوصية التامة.</p>
+        </div>
+
+        <!-- Upload Card -->
+        <div class="glass border border-slate-800 rounded-3xl p-5 shadow-2xl flex flex-col gap-4">
+            <div class="text-center">
+                <h2 class="text-base font-bold text-slate-200">أرسل صور الموضوع أو التمرين</h2>
+                <p class="text-xs text-slate-400 mt-1">الدروس مُحمّلة ومزامنة من المستودع تلقائياً</p>
+            </div>
+
+            <!-- Drag & Drop Dropzone -->
+            <label for="image-input" id="dropzone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500/60 transition rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-900/40 hover:bg-slate-900/80 group">
+                <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition shadow-inner">
+                    📁
+                </div>
+                <span class="text-xs font-semibold text-slate-300 mt-3">اضغط لاختيار الصور أو اسحبها هنا</span>
+                <span class="text-[10px] text-slate-500 mt-1">PNG, JPG, WEBP مسموح بها</span>
+                <input type="file" id="image-input" accept="image/*" multiple class="hidden">
+            </label>
+
+            <!-- Selected Images Preview Container -->
+            <div id="preview-container" class="hidden grid grid-cols-4 gap-2 max-h-40 overflow-y-auto p-1"></div>
+
+            <!-- Action Button -->
+            <button id="solve-btn" disabled class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed text-white font-bold rounded-2xl transition shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2">
+                <span>✨ ابدأ حل الموضوع</span>
+            </button>
+        </div>
+
+        <!-- Progress / Status Card -->
+        <div id="status-card" class="hidden glass border border-slate-800 rounded-3xl p-5 flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+                <span id="status-title" class="text-xs font-bold text-emerald-400 flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    جارٍ قراءة الموضوع...
+                </span>
+                <span id="status-percent" class="text-xs text-slate-400 font-mono">0%</span>
+            </div>
+            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
+                <div id="progress-bar" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-container" class="hidden flex flex-col gap-4">
+            <div class="flex items-center justify-between px-1">
+                <h3 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+                    <span>📝</span> الحلول النموذجية المقترحة
+                </h3>
+                <button id="reset-btn" class="text-xs text-slate-400 hover:text-emerald-400 transition underline">
+                    مسح وبدء جديد
+                </button>
+            </div>
+            <div id="solutions-list" class="flex flex-col gap-4"></div>
+            <div id="usage-stats" class="glass border border-slate-800/60 rounded-2xl p-4 text-xs text-slate-400 flex flex-col gap-1 font-mono"></div>
+        </div>
+
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass border border-slate-700/80 rounded-3xl max-w-sm w-full p-6 flex flex-col gap-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm text-slate-200">إعدادات مفتاح Gemini API</h3>
+                <button id="close-settings" class="text-slate-400 hover:text-white text-lg">✕</button>
+            </div>
+            <p class="text-xs text-slate-400">مفتاحك يُخزن محلياً في متصفحك (`localStorage`) ولا يُرسل لأي جهة سوى خوادم Google.</p>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-slate-300">أدخل مفتاح API:</label>
+                <input type="password" id="api-key-input" placeholder="AIzaSy..." class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+            </div>
+            <button id="save-key-btn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition text-xs shadow-md">
+                حفظ المفتاح
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-[11px] text-slate-600 border-t border-slate-900">
+        مشروع مفتوح وخاص بالعلوم الإسلامية للبكالوريا • مدعوم بـ Google Gemini
+    </footer>
+
+    <!-- Logic Script -->
+    <script type="module">
+        import { GoogleGenAI } from "@google/genai";
+
+        // Telegram Web App Initialization
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
+
+        // ==================== إعدادات الـ GitHub ودروس الـ ZIP ====================
+        const GITHUB_USER = "Raoufsb";    // اسم المستخدم على جيت هب
+        const REPO_NAME = "islamic-bot";  // اسم المستودع لديك
+        const BRANCH = "main";
+
+        const VERSION_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/version.txt`;
+        const ZIP_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/دروس.zip`;
+
+        let LESSONS = [];
+
+        // دالة قراءة ومعالجة ملفات الدروس (تحاكي كود بايثون تماماً)
+        async function loadLessonsFromZip(zipBlob) {
+            const zip = new JSZip();
+            const contents = await zip.loadAsync(zipBlob);
+            const loadedLessons = [];
+
+            for (let filename of Object.keys(contents.files)) {
+                const fileObj = contents.files[filename];
+                if (fileObj.dir || (!filename.endsWith('.txt') && !filename.endsWith('.md'))) continue;
+
+                const raw = await fileObj.async("text");
+                
+                // البحث عن === الوصف === تماماً مثل البايثون
+                const descMatch = raw.match(/===\s*الوصف\s*===([\s\S]*?)(?=^===|\Z)/m);
+                if (!descMatch) continue;
+
+                const desc = descMatch[1].trim();
+                const idMatch = desc.match(/^\s*id\s*:\s*(.+)$/m);
+                const titleMatch = desc.match(/^\s*العنوان\s*:\s*(.+)$/m);
+
+                const stem = filename.split('/').pop().replace(/\.[^/.]+$/, "");
+
+                loadedLessons.push({
+                    id: idMatch ? idMatch[1].trim() : stem,
+                    title: titleMatch ? titleMatch[1].trim() : stem,
+                    raw: raw
+                });
+            }
+            return loadedLessons;
+        }
+
+        // نظام التحقق من الإصدار وتحديث ملف "دروس.zip" تلقائياً
+        async function initLessonsSync() {
+            const statusEl = document.getElementById('sync-status');
+            try {
+                statusEl.innerText = "🔄 جاري التحقق من تحديثات الدروس...";
+
+                const verRes = await fetch(VERSION_URL + "?t=" + Date.now());
+                if (!verRes.ok) throw new Error("تعذر جلب الإصدار");
+                const remoteVersion = (await verRes.text()).trim();
+
+                const localVersion = localStorage.getItem('lessons_version');
+                const cachedLessons = localStorage.getItem('cached_lessons');
+
+                if (!cachedLessons || localVersion !== remoteVersion) {
+                    statusEl.innerText = "📥 جاري تحميل وفك ضغط دروس.zip...";
+                    
+                    const zipRes = await fetch(ZIP_URL + "?t=" + Date.now());
+                    if (!zipRes.ok) throw new Error("تعذر تحميل ملف دروس.zip");
+                    const zipBlob = await zipRes.blob();
+
+                    LESSONS = await loadLessonsFromZip(zipBlob);
+
+                    localStorage.setItem('cached_lessons', JSON.stringify(LESSONS));
+                    localStorage.setItem('lessons_version', remoteVersion);
+                    statusEl.innerText = `✅ جاهز (${LESSONS.length} درس - إصدار ${remoteVersion})`;
+                } else {
+                    LESSONS = JSON.parse(cachedLessons);
+                    statusEl.innerText = `⚡ جاهز (${LESSONS.length} درس متزامن)`;
+                }
+            } catch (err) {
+                console.warn("خطأ في مزامنة الدروس:", err);
+                const cached = localStorage.getItem('cached_lessons');
+                if (cached) {
+                    LESSONS = JSON.parse(cached);
+                    statusEl.innerText = "⚠️ وضع عدم الاتصال (الدروس المخزنة)";
+                } else {
+                    statusEl.innerText = "❌ فشل تحميل الدروس";
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initLessonsSync();
+        });
+
+        // ==================== البرومتات (مطابقة لبايثون) ====================
+        const READ_SYSTEM = `أنت تقرأ صور موضوع امتحان (أو تمرين) في مادة العلوم الإسلامية. قد تحوي الصور موضوعاً كاملاً بعدة تمارين، أو تمريناً واحداً، أو جزءاً من صفحة.
+مهمتك: استخراج كل تمرين على حدة، وإخراجه بصيغة JSON فقط:
+{"exercises": [{"label": "...", "text": "..."}], "note": "..."}
+القواعد:
+- label: عنوان التمرين كما هو مكتوب في الورقة (مثل: التمرين الأول، الجزء الأول، الوضعية الإدماجية). إن لم يوجد عنوان فاكتب "التمرين".
+- text: النص الكامل للتمرين: السند (آية أو حديث أو نص) ثم كل الأسئلة بنفس ترقيمها وعلاماتها كما في الورقة.
+- انقل الآيات والأحاديث حرفياً كما تظهر في الصورة بالتشكيل نفسه. لا تصحح ولا تكمل من ذاكرتك.
+- إن كان سند واحد تتبعه عدة أسئلة فهو تمرين واحد.
+- ما لا تستطيع قراءته اكتب مكانه [غير مقروء] ولا تخمّن.
+- إن كانت الصور لا تحتوي موضوعاً ولا تمريناً، فاجعل exercises قائمة فارغة واكتب في note سبباً قصيراً موجهاً للمستخدم.
+- note يبقى فارغاً في الحالة العادية.
+- لا تحل الأسئلة في هذه المرحلة.`;
+
+        const SELECT_SYSTEM = `أمامك قائمة دروس بأوصافها، وتمرين من موضوع في العلوم الإسلامية.
+اختر الدروس اللازمة لحل هذا التمرين. يجوز اختيار أكثر من درس.
+اختيار درس زائد أفضل من درس ناقص. إن لم يناسب أي درس من القائمة فاجعل القائمة فارغة.
+استعمل معرّفات الدروس كما هي في القائمة فقط.
+أخرج JSON فقط:
+{"lessons": ["معرّف"], "reason": "جملة قصيرة"}`;
+
+        const SOLVE_SYSTEM = `أنت أستاذ العلوم الإسلامية للبكالوريا الجزائرية. تحل التمرين كما يُنتظر في ورقة الإجابة النموذجية.
+القواعد:
+- اعتمد على الدروس المرفقة مرجعًا أول والتزم بمصطلحاتها وعباراتها. وإن لم يرد الجواب فيها نصًا فاستنتجه منها، أو أجب بما هو معلوم بداهة في مستوى البكالوريا الجزائرية، بإيجاز وبمصطلحات الدروس. لا تخترع أرقامًا ولا أسماء ولا أقوال علماء لم ترد.
+- اتبع "أنواع الأسئلة وطريقة حلها" و"الأمثلة المحلولة" في الدروس من حيث الشكل والطول والمصطلحات.
+- أجب عن كل سؤال في التمرين بنفس ترقيمه (أ، ب، 1، 2...) وبالترتيب، وإن كانت الأسئلة متتابعة فاستعمل أجوبة السابقة في اللاحقة.
+- أجب عن المطلوب في كل سؤال بالضبط ولا تزد عليه. لا تضف عنصراً لم يطلبه السؤال صراحة (مثل محل الشاهد أو الشرح أو سبب الانحراف أو الأثر)، حتى لو ظهر هذا العنصر في كل الأمثلة المحلولة.
+- الأمثلة المحلولة تبيّن الأسلوب والصياغة فقط، وليست قالباً يُنسخ. القالب الوحيد هو نص السؤال: اقرأ "المطلوب" في كل سؤال وأعطِ عناصره فقط.
+- إن طلب السؤال شيئاً واحداً (مثل: استخرج الوسيلة) فأعطه وحده دون غيره.
+- الآيات والأحاديث: انقلها حرفياً بالتشكيل من نص التمرين أو من الدروس فقط. لا تكتب نصاً قرآنياً أو حديثاً من ذاكرتك.
+- لا مقدمات ولا خاتمة ولا تعليق على الموضوع. الإجابة فقط.
+- لا تكتب "خارج الدروس المتوفرة" إلا إذا كان السؤال في موضوع لا علاقة له بأي من الدروس المرفقة ولا تستطيع الإجابة عنه بيقين. وفيما عدا ذلك أجب دائمًا.`;
+
+        let selectedFiles = [];
+
+        const imageInput = document.getElementById('image-input');
+        const previewContainer = document.getElementById('preview-container');
+        const solveBtn = document.getElementById('solve-btn');
+        const statusCard = document.getElementById('status-card');
+        const statusTitle = document.getElementById('status-title');
+        const statusPercent = document.getElementById('status-percent');
+        const progressBar = document.getElementById('progress-bar');
+        const resultsContainer = document.getElementById('results-container');
+        const solutionsList = document.getElementById('solutions-list');
+        const usageStats = document.getElementById('usage-stats');
+        const apiKeyBanner = document.getElementById('api-key-banner');
+        const settingsModal = document.getElementById('settings-modal');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const saveKeyBtn = document.getElementById('save-key-btn');
+        const settingsBtn = document.getElementById('settings-btn');
+        const closeSettings = document.getElementById('close-settings');
+        const openSettingsInline = document.getElementById('open-settings-inline');
+        const resetBtn = document.getElementById('reset-btn');
+
+        function getApiKey() {
+            return localStorage.getItem('gemini_api_key') || '';
+        }
+
+        function checkApiKey() {
+            const key = getApiKey();
+            if (!key) {
+                apiKeyBanner.classList.remove('hidden');
+            } else {
+                apiKeyBanner.classList.add('hidden');
+                apiKeyInput.value = key;
+            }
+        }
+        checkApiKey();
+
+        settingsBtn.onclick = () => settingsModal.classList.remove('hidden');
+        openSettingsInline.onclick = () => settingsModal.classList.remove('hidden');
+        closeSettings.onclick = () => settingsModal.classList.add('hidden');
+        
+        saveKeyBtn.onclick = () => {
+            const val = apiKeyInput.value.trim();
+            if (val) {
+                localStorage.setItem('gemini_api_key', val);
+                settingsModal.classList.add('hidden');
+                checkApiKey();
+                alert('تم حفظ المفتاح بنجاح!');
+            } else {
+                alert('الرجاء إدخال مفتاح صحيح.');
+            }
+        };
+
+        imageInput.onchange = (e) => handleFiles(e.target.files);
+
+        async function handleFiles(files) {
+            for (let file of files) {
+                const base64 = await toBase64(file);
+                selectedFiles.push({
+                    file: file,
+                    base64: base64.split(',')[1],
+                    mimeType: file.type || 'image/jpeg'
+                });
+            }
+            renderPreviews();
+        }
+
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function renderPreviews() {
+            if (selectedFiles.length > 0) {
+                previewContainer.classList.remove('hidden');
+                solveBtn.removeAttribute('disabled');
+                previewContainer.innerHTML = selectedFiles.map((item, index) => `
+                    <div class="relative group aspect-square rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
+                        <img src="data:${item.mimeType};base64,${item.base64}" class="w-full h-full object-cover">
+                        <button onclick="window.removeImage(${index})" class="absolute top-1 right-1 bg-red-600/80 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] transition">✕</button>
+                    </div>
+                `).join('');
+            } else {
+                previewContainer.classList.add('hidden');
+                solveBtn.setAttribute('disabled', 'true');
+            }
+        }
+
+        window.removeImage = (index) => {
+            selectedFiles.splice(index, 1);
+            renderPreviews();
+        };
+
+        resetBtn.onclick = () => {
+            selectedFiles = [];
+            renderPreviews();
+            resultsContainer.classList.add('hidden');
+            statusCard.classList.add('hidden');
+        };
+
+        solveBtn.onclick = async () => {
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                settingsModal.classList.remove('hidden');
+                return;
+            }
+
+            const ai = new GoogleGenAI({ apiKey: apiKey });
+            const modelName = 'gemini-2.5-flash';
+
+            statusCard.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            solveBtn.setAttribute('disabled', 'true');
+            
+            let totalIn = 0, totalOut = 0, totalCalls = 0;
+
+            try {
+                updateStatus('قراءة الصور واستخراج التمارين...', 25);
+                
+                const imageParts = selectedFiles.map(img => ({
+                    inlineData: { data: img.base64, mimeType: img.mimeType }
+                }));
+
+                const readResp = await ai.models.generateContent({
+                    model: modelName,
+                    contents: ["اقرأ الصور المرفقة واستخرج التمارين بدقة.", ...imageParts],
+                    config: { systemInstruction: READ_SYSTEM, responseMimeType: "application/json" }
+                });
+
+                if (readResp.usageMetadata) {
+                    totalIn += readResp.usageMetadata.promptTokenCount || 0;
+                    totalOut += (readResp.usageMetadata.candidatesTokenCount || 0) + (readResp.usageMetadata.thoughtsTokenCount || 0);
+                    totalCalls++;
+                }
+
+                const readData = JSON.parse(readResp.text.trim());
+                const exercises = (readData.exercises || []).filter(e => e.text && e.text.trim());
+
+                if (exercises.length === 0) {
+                    alert(readData.note || "لم أجد تمريناً واضحاً في الصور.");
+                    statusCard.classList.add('hidden');
+                    solveBtn.removeAttribute('disabled');
+                    return;
+                }
+
+                updateStatus(`وجدت ${exercises.length} تمرين، جارٍ اختيار الدروس والحل...`, 60);
+
+                let solvedResults = [];
+                for (let i = 0; i < exercises.length; i++) {
+                    const ex = exercises[i];
+                    
+                    const catalog = LESSONS.map(l => `[${l.id}] ${l.title}\n${l.raw}`).join('\n\n');
+                    
+                    const selectResp = await ai.models.generateContent({
+                        model: modelName,
+                        contents: [`قائمة الدروس:\n${catalog}\n\nالتمرين:\n{ex.text}`],
+                        config: { systemInstruction: SELECT_SYSTEM, responseMimeType: "application/json" }
+                    });
+
+                    if (selectResp.usageMetadata) {
+                        totalIn += selectResp.usageMetadata.promptTokenCount || 0;
+                        totalOut += (selectResp.usageMetadata.candidatesTokenCount || 0) + (selectResp.usageMetadata.thoughtsTokenCount || 0);
+                        totalCalls++;
+                    }
+
+                    let chosenLessonsText = "";
+                    try {
+                        const selData = JSON.parse(selectResp.text.trim());
+                        const normId = x => String(x).trim().replace(/^0+/, '') || '0';
+                        const wantedIds = new Set((selData.lessons || []).map(normId));
+                        
+                        const matchedLessons = LESSONS.filter(l => wantedIds.has(normId(l.id)));
+                        
+                        if (matchedLessons.length > 0) {
+                            chosenLessonsText = matchedLessons.map(l => `########## الدرس ${l.id}: ${l.title} ##########\n${l.raw}`).join('\n\n');
+                        }
+                    } catch(e) {}
+
+                    const solveResp = await ai.models.generateContent({
+                        model: modelName,
+                        contents: [`الدروس:\n${chosenLessonsText}\n\nالتمرين (${ex.label || 'التمرين'}):\n${ex.text}`],
+                        config: { systemInstruction: SOLVE_SYSTEM }
+                    });
+
+                    if (solveResp.usageMetadata) {
+                        totalIn += solveResp.usageMetadata.promptTokenCount || 0;
+                        totalOut += (solveResp.usageMetadata.candidatesTokenCount || 0) + (solveResp.usageMetadata.thoughtsTokenCount || 0);
+                        totalCalls++;
+                    }
+
+                    solvedResults.push({
+                        label: ex.label || `التمرين ${i+1}`,
+                        solution: solveResp.text.trim()
+                    });
+                }
+
+                updateStatus('اكتمل الحل بنجاح!', 100);
+                setTimeout(() => statusCard.classList.add('hidden'), 500);
+                renderSolutions(solvedResults, { in: totalIn, out: totalOut, calls: totalCalls });
+
+            } catch (err) {
+                console.error(err);
+                alert("حدث خطأ أثناء المعالجة: " + err.message);
+                statusCard.classList.add('hidden');
+            } finally {
+                solveBtn.removeAttribute('disabled');
+            }
+        };
+
+        function updateStatus(text, percent) {
+            statusTitle.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>${text}`;
+            statusPercent.innerText = `${percent}%`;
+            progressBar.style.width = `${percent}%`;
+        }
+
+        function renderSolutions(results, stats) {
+            resultsContainer.classList.remove('hidden');
+            solutionsList.innerHTML = results.map((res) => `
+                <div class="glass border border-slate-800 rounded-2xl p-4 flex flex-col gap-3 shadow-lg">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <span class="font-bold text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">${res.label}</span>
+                        <button onclick="navigator.clipboard.writeText(\`${res.solution.replace(/`/g, '\\`')}\`)" class="text-[11px] text-slate-400 hover:text-white bg-slate-800/80 px-2.5 py-1 rounded-lg transition border border-slate-700/50 flex items-center gap-1">
+                            📋 نسخ الحل
+                        </button>
+                    </div>
+                    <div class="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap font-sans bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80">${res.solution}</div>
+                </div>
+            `).join('');
+
+            usageStats.innerHTML = `
+                <div class="font-bold text-slate-300 mb-1">📊 إحصائيات التوكنات والاستدعاءات</div>
+                <div>إدخال: ${stats.in.toLocaleString()} | إخراج: ${stats.out.toLocaleString()}</div>
+                <div>المجموع: ${(stats.in + stats.out).toLocaleString()} توكن (${stats.calls} استدعاء)</div>
+            `;
+        }
+    </script>
+</body>
+</html>
