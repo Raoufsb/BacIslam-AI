@@ -1,277 +1,331 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مصحح ومحلل مواضيع الشريعة</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Telegram Web App SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- JSZip Library لمعالجة ملفات الـ zip في المتصفح -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- Google GenAI SDK (ES Module) -->
-    <script type="importmap">
-      {
-        "imports": {
-          "@google/genai": "https://esm.run/@google/genai"
-        }
-      }
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Cairo', sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); }
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .animate-pulse-slow { animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0b1220">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://telegram.org https://cdnjs.cloudflare.com; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data: blob:; connect-src https://generativelanguage.googleapis.com https://cdn.jsdelivr.net https://fastly.jsdelivr.net https://gcore.jsdelivr.net; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>BacAI</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b1220; --surface:#111a2e; --card:#16213a; --line:#223052;
+  --text:#e8eefc; --muted:#8fa0c2; --accent:#10b981; --accent2:#14b8a6;
+  --accent-ink:#04261c; --danger:#f43f5e; --warn:#f59e0b;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+[data-theme="light"]{
+  --bg:#f4f7fb; --surface:#ffffff; --card:#ffffff; --line:#e2e8f0;
+  --text:#0f172a; --muted:#64748b; --accent:#059669; --accent2:#0d9488;
+  --accent-ink:#ffffff; --shadow:0 10px 30px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:'Cairo',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
+  font-size:15px;line-height:1.7}
+body{min-height:100vh;min-height:100dvh}
+.hidden{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
+h1,h2,h3,p{margin:0}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.muted{color:var(--muted)} .small{font-size:12.5px} .center{text-align:center}
+
+/* الشاشات الكاملة */
+.splash,.blocked{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+.logo-lg{width:76px;height:76px;border-radius:24px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink);box-shadow:var(--shadow)}
+.logo-lg svg.i{width:38px;height:38px}
+.brand{font-weight:800;font-size:26px;letter-spacing:.5px}
+.spinner{width:26px;height:26px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* الهيكل */
+.app{max-width:520px;margin:0 auto;padding:0 16px calc(28px + env(safe-area-inset-bottom))}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+  padding:calc(12px + env(safe-area-inset-top)) 0 12px;background:var(--bg)}
+.brand-row{display:flex;align-items:center;gap:11px}
+.logo{width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink)}
+.brand-row h1{font-size:17px;font-weight:800;line-height:1.2}
+.brand-row p{font-size:11.5px;color:var(--muted)}
+.top-actions{display:flex;gap:8px}
+.icon-btn{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);
+  display:inline-flex;align-items:center;justify-content:center;color:var(--muted)}
+.icon-btn:active{transform:scale(.95)}
+.icon-btn.sm{width:34px;height:34px;border-radius:10px}
+.view{display:flex;flex-direction:column;gap:16px;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow)}
+.hero h2{font-size:21px;font-weight:800;line-height:1.4}
+.hero p{margin-top:6px;color:var(--muted);font-size:13.5px}
+
+.banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-radius:16px;
+  background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3)}
+.banner div{display:flex;flex-direction:column;font-size:12.5px;color:var(--muted)}
+.banner strong{color:var(--text);font-size:14px}
+.banner.warn{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.35)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 18px;border-radius:14px;
+  font-weight:700;font-size:14.5px;transition:transform .08s,opacity .2s}
+.btn:active{transform:scale(.98)} .btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink);box-shadow:0 8px 20px rgba(16,185,129,.22)}
+.btn.secondary{background:var(--card);border:1px solid var(--line)}
+.btn.ghost{color:var(--muted)}
+.btn.danger{color:var(--danger);background:var(--card);border:1px solid var(--line)}
+.btn.block{width:100%} .btn.sm{padding:8px 14px;font-size:13px;border-radius:12px}
+
+.pick{display:flex;flex-direction:column;gap:14px}
+.pick-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pick-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 10px;border-radius:16px;
+  border:1.5px dashed var(--line);background:var(--surface);color:var(--accent);font-weight:700}
+.pick-btn b{color:var(--text);font-size:13.5px}
+.pick-btn svg.i{width:26px;height:26px}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.thumb{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb button{position:absolute;top:6px;left:6px;width:24px;height:24px;border-radius:50%;
+  background:rgba(0,0,0,.65);color:#fff;display:flex;align-items:center;justify-content:center}
+.thumb button svg.i{width:14px;height:14px;stroke-width:2.4}
+
+/* العمل */
+.work h2{font-size:17px;font-weight:800}
+.work-head{display:flex;align-items:center;gap:10px}
+.pulse{width:12px;height:12px;border-radius:50%;background:var(--accent);animation:pulse 1.4s ease infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.5)}100%{box-shadow:0 0 0 12px rgba(16,185,129,0)}}
+.steps{list-style:none;padding:0;margin:16px 0;display:grid;gap:12px}
+.steps li{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px}
+.steps .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex:none}
+.steps li.active{color:var(--text);font-weight:700}
+.steps li.active .dot{border-color:var(--accent);border-top-color:transparent;animation:spin 1s linear infinite}
+.steps li.done{color:var(--text)}
+.steps li.done .dot{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.steps li.done .dot svg.i{width:13px;height:13px;stroke-width:3}
+.bar{height:8px;background:var(--surface);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s ease}
+.work .sub{margin:10px 0 14px;font-size:12.5px;color:var(--muted)}
+
+/* النتائج */
+.res-head h2{font-size:19px;font-weight:800}
+.res-head p{color:var(--muted);font-size:12.5px;margin-top:2px}
+.sol-card{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.sol-head{display:flex;align-items:center;justify-content:space-between}
+.chip{font-weight:700;font-size:12.5px;color:var(--accent);background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);
+  padding:3px 12px;border-radius:99px}
+.sol{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;font-size:14px;line-height:1.95}
+.ln{padding:1px 0}
+.ln.b::before{content:'•';color:var(--accent);margin-inline-end:8px;font-weight:800}
+.l1{padding-inline-start:18px}.l2{padding-inline-start:36px}.l3{padding-inline-start:54px}
+.sp{height:8px}
+.badge{font-size:12.5px;padding:9px 12px;border-radius:12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);color:var(--text)}
+.err-box{font-size:13.5px;padding:12px;border-radius:12px;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.35)}
+.note{font-size:12px;color:var(--muted);text-align:center;margin:2px 0 4px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dev{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--muted);white-space:pre-wrap;direction:ltr;text-align:left}
+
+/* السجل */
+.h-item{display:flex;flex-direction:column;gap:4px;text-align:start;width:100%;margin-bottom:10px}
+.h-item b{font-size:14px}
+.h-item span{font-size:12px;color:var(--muted)}
+.empty{padding:36px 10px;text-align:center;color:var(--muted)}
+
+/* النوافذ السفلية */
+.sheet-wrap{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.sheet{position:relative;width:100%;max-width:520px;background:var(--surface);border:1px solid var(--line);
+  border-radius:24px 24px 0 0;padding:14px 18px calc(20px + env(safe-area-inset-bottom));max-height:90vh;max-height:90dvh;
+  overflow:auto;animation:up .25s ease;display:flex;flex-direction:column;gap:14px}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.grab{width:44px;height:5px;border-radius:99px;background:var(--line);margin:0 auto 2px}
+.sheet h2{font-size:18px;font-weight:800}
+.steps-list{margin:0;padding-inline-start:20px;display:grid;gap:6px;color:var(--muted);font-size:13.5px}
+.field{display:flex;gap:8px}
+.field input{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+  color:var(--text);font:inherit;font-size:14px;direction:ltr;text-align:left}
+.field input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.err-line{color:var(--danger);font-size:13px;min-height:0}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.set-row:last-of-type{border-bottom:0}
+.set-row b{font-size:14px;display:block}
+.set-row span.m{font-size:12px;color:var(--muted)}
+.foot{font-size:12px;color:var(--muted);text-align:center;line-height:1.8}
+
+.toast{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translate(-50%,24px);opacity:0;
+  max-width:86vw;background:var(--text);color:var(--bg);padding:11px 18px;border-radius:14px;font-size:13.5px;font-weight:600;
+  z-index:200;pointer-events:none;transition:all .25s ease;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.error{background:var(--danger);color:#fff}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+<body>
 
-    <!-- نافذة الانتظار للمزامنة (Sync Modal) -->
-    <div id="sync-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="glass border border-slate-800 rounded-3xl max-w-sm w-full p-6 flex flex-col items-center text-center gap-4 shadow-2xl">
-            <div class="w-14 h-14 rounded-2xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl animate-bounce">
-                📚
-            </div>
-            <div>
-                <h3 class="font-bold text-base text-slate-100">جاري إعداد المرشد الشرعي</h3>
-                <p id="sync-modal-text" class="text-xs text-slate-400 mt-1">يتم التحقق من تحديثات الدروس...</p>
-            </div>
-            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                <div id="sync-progress-bar" class="bg-emerald-500 h-full w-2/3 animate-pulse"></div>
-            </div>
-        </div>
+<div id="splash" class="splash">
+  <div class="logo-lg"><span data-i="book"></span></div>
+  <div class="brand">BacAI</div>
+  <div class="spinner"></div>
+  <p id="splash-text" class="muted small">جارٍ التحضير…</p>
+</div>
+
+<div id="blocked" class="blocked hidden">
+  <div class="logo-lg"><span data-i="book"></span></div>
+  <div class="brand">BacAI</div>
+  <p class="muted">يعمل هذا التطبيق داخل تيليجرام فقط.<br>افتحه من بوت BacAI.</p>
+  <a id="open-bot" class="btn primary hidden" style="text-decoration:none">فتح البوت</a>
+</div>
+
+<div id="app" class="app hidden">
+  <header class="top">
+    <div class="brand-row">
+      <div class="logo"><span data-i="book"></span></div>
+      <div><h1>BacAI</h1><p>حلّ مواضيع العلوم الإسلامية</p></div>
     </div>
-
-    <!-- Top Header -->
-    <header class="w-full border-b border-slate-800/80 bg-slate-900/50 backdrop-blur sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center space-x-3 space-x-reverse">
-            <div class="w-9 h-9 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-lg">
-                📚
-            </div>
-            <div>
-                <h1 class="font-bold text-sm text-slate-200">المرشد الشرعي للبكالوريا</h1>
-                <p id="header-status" class="text-[10px] text-emerald-400">متزامن ومحدث</p>
-            </div>
-        </div>
-        <button id="settings-btn" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-sm flex items-center gap-1.5 border border-slate-700/50">
-            <span>⚙️</span>
-            <span class="text-xs">الإعدادات</span>
-        </button>
-    </header>
-
-    <!-- Main Container -->
-    <main class="max-w-xl w-full mx-auto p-4 flex-grow flex flex-col gap-5">
-
-        <!-- API Key Banner -->
-        <div id="api-key-banner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-200 flex flex-col gap-2">
-            <div class="flex items-center justify-between">
-                <span class="font-bold flex items-center gap-1.5">⚠️ مفتاح Gemini API مفقود</span>
-                <button id="open-settings-inline" class="underline font-semibold hover:text-white">إدخاله الآن</button>
-            </div>
-            <p class="text-amber-300/80">التطبيق محلي تماماً ويعتمد على مفتاحك الشخصي لضمان الخصوصية التامة.</p>
-        </div>
-
-        <!-- Upload Card -->
-        <div class="glass border border-slate-800 rounded-3xl p-5 shadow-2xl flex flex-col gap-4">
-            <div class="text-center">
-                <h2 class="text-base font-bold text-slate-200">أرسل صور الموضوع أو التمرين</h2>
-                <p class="text-xs text-slate-400 mt-1">الدروس جاهزة ومحدثة للعمل الفوري</p>
-            </div>
-
-            <label for="image-input" id="dropzone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500/60 transition rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer bg-slate-900/40 hover:bg-slate-900/80 group">
-                <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition shadow-inner">
-                    📁
-                </div>
-                <span class="text-xs font-semibold text-slate-300 mt-3">اضغط لاختيار الصور أو اسحبها هنا</span>
-                <span class="text-[10px] text-slate-500 mt-1">PNG, JPG, WEBP مسموح بها</span>
-                <input type="file" id="image-input" accept="image/*" multiple class="hidden">
-            </label>
-
-            <div id="preview-container" class="hidden grid grid-cols-4 gap-2 max-h-40 overflow-y-auto p-1"></div>
-
-            <button id="solve-btn" disabled class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed text-white font-bold rounded-2xl transition shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2">
-                <span>✨ ابدأ حل الموضوع</span>
-            </button>
-        </div>
-
-        <!-- Status Card -->
-        <div id="status-card" class="hidden glass border border-slate-800 rounded-3xl p-5 flex flex-col gap-4">
-            <div class="flex items-center justify-between">
-                <span id="status-title" class="text-xs font-bold text-emerald-400 flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    جارٍ قراءة الموضوع...
-                </span>
-                <span id="status-percent" class="text-xs text-slate-400 font-mono">0%</span>
-            </div>
-            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                <div id="progress-bar" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
-            </div>
-        </div>
-
-        <!-- Results Section -->
-        <div id="results-container" class="hidden flex flex-col gap-4">
-            <div class="flex items-center justify-between px-1">
-                <h3 class="font-bold text-sm text-slate-200 flex items-center gap-2">
-                    <span>📝</span> الحلول النموذجية المقترحة
-                </h3>
-                <button id="reset-btn" class="text-xs text-slate-400 hover:text-emerald-400 transition underline">
-                    مسح وبدء جديد
-                </button>
-            </div>
-            <div id="solutions-list" class="flex flex-col gap-4"></div>
-            <div id="usage-stats" class="glass border border-slate-800/60 rounded-2xl p-4 text-xs text-slate-400 flex flex-col gap-1 font-mono"></div>
-        </div>
-
-    </main>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="glass border border-slate-700/80 rounded-3xl max-w-sm w-full p-6 flex flex-col gap-4 shadow-2xl">
-            <div class="flex items-center justify-between">
-                <h3 class="font-bold text-sm text-slate-200">إعدادات مفتاح Gemini API</h3>
-                <button id="close-settings" class="text-slate-400 hover:text-white text-lg">✕</button>
-            </div>
-            <p class="text-xs text-slate-400">مفتاحك يُخزن محلياً في متصفحك (`localStorage`) ولا يُرسل لأي جهة سوى خوادم Google.</p>
-            <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-slate-300">أدخل مفتاح API:</label>
-                <input type="password" id="api-key-input" placeholder="AIzaSy..." class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
-            </div>
-            <button id="save-key-btn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition text-xs shadow-md">
-                حفظ المفتاح
-            </button>
-        </div>
+    <div class="top-actions">
+      <button id="btn-history" class="icon-btn" aria-label="السجل"><span data-i="history"></span></button>
+      <button id="btn-settings" class="icon-btn" aria-label="الإعدادات"><span data-i="settings"></span></button>
     </div>
+  </header>
 
-    <!-- Footer -->
-    <footer class="text-center py-4 text-[11px] text-slate-600 border-t border-slate-900">
-        مشروع مفتوح وخاص بالعلوم الإسلامية للبكالوريا • مدعوم بـ Google Gemini
-    </footer>
+  <main>
+    <!-- الرئيسية -->
+    <section id="view-home" class="view">
+      <div class="hero">
+        <h2>صوّر الموضوع واحصل على الحل</h2>
+        <p>التقط صورة لموضوع العلوم الإسلامية أو لتمرين واحد، وسنكتب لك الحل النموذجي بأسلوب ورقة الإجابة.</p>
+      </div>
 
-    <!-- Logic Script -->
-    <script type="module">
-        import { GoogleGenAI } from "@google/genai";
+      <div id="banner-key" class="banner hidden">
+        <div><strong>فعّل التطبيق لتبدأ</strong><span>تحتاج مفتاح تفعيل مجاني من Google، ويستغرق دقيقة.</span></div>
+        <button id="banner-key-btn" class="btn primary sm">تفعيل</button>
+      </div>
+      <div id="banner-lessons" class="banner warn hidden">
+        <div><strong>تعذّر تحميل الدروس</strong><span>تحقق من اتصالك بالإنترنت ثم أعد المحاولة.</span></div>
+        <button id="banner-lessons-btn" class="btn secondary sm">إعادة المحاولة</button>
+      </div>
 
-        const tg = window.Telegram?.WebApp;
-        if (tg) {
-            tg.ready();
-            tg.expand();
-        }
+      <div class="card pick">
+        <div class="pick-btns">
+          <button id="btn-cam" class="pick-btn"><span data-i="camera"></span><b>التقاط صورة</b></button>
+          <button id="btn-gal" class="pick-btn"><span data-i="image"></span><b>من المعرض</b></button>
+        </div>
+        <div id="thumbs" class="thumbs hidden"></div>
+        <p id="pick-hint" class="muted small center">أضف صورة واضحة ومضاءة تُظهر كامل الأسئلة. يمكنك إضافة عدة صور.</p>
+        <button id="btn-solve" class="btn primary block" disabled><span data-i="spark"></span>حلّ الموضوع</button>
+      </div>
+      <p class="muted small center">تُرسل الصور مباشرة من جهازك إلى Google لمعالجتها، ولا تُحفظ في أي خادم تابع للتطبيق.</p>
+    </section>
 
-        const GITHUB_USER = "Raoufsb";    
-        const REPO_NAME = "BacIslam-AI";  
+    <!-- جارٍ العمل -->
+    <section id="view-working" class="view hidden">
+      <div class="card work">
+        <div class="work-head"><div class="pulse"></div><h2 id="work-title">جارٍ العمل…</h2></div>
+        <ol class="steps">
+          <li id="st-read"><span class="dot"></span><span>قراءة الموضوع</span></li>
+          <li id="st-solve"><span class="dot"></span><span id="st-solve-text">إعداد الحلول</span></li>
+        </ol>
+        <div class="bar"><i id="bar"></i></div>
+        <p id="work-sub" class="sub">قد يستغرق ذلك قرابة نصف دقيقة. لا تغلق التطبيق.</p>
+        <button id="btn-cancel" class="btn ghost block">إلغاء</button>
+      </div>
+    </section>
 
-        const VERSION_URL = `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${REPO_NAME}@main/version.txt`;
-        const ZIP_URL = `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${REPO_NAME}@main/دروس.zip`;
+    <!-- النتيجة -->
+    <section id="view-result" class="view hidden">
+      <div class="res-head"><h2 id="res-title"></h2><p id="res-sub"></p></div>
+      <div id="res-list"></div>
+      <p class="note">الحلول مقترحة بالذكاء الاصطناعي، فراجعها مع كتابك المدرسي ومعلّمك.</p>
+      <div id="res-dev" class="card dev hidden"></div>
+      <div class="row">
+        <button id="btn-copy-all" class="btn secondary"><span data-i="copy"></span>نسخ الكل</button>
+        <button id="btn-new" class="btn primary"><span data-i="camera"></span>موضوع جديد</button>
+      </div>
+    </section>
 
-        let LESSONS = [];
+    <!-- السجل -->
+    <section id="view-history" class="view hidden">
+      <div class="res-head"><h2>السجل</h2><p>آخر المواضيع التي حللتها على هذا الجهاز</p></div>
+      <div id="hist-list"></div>
+    </section>
+  </main>
+</div>
 
-        function isNewerVersion(remote, local) {
-            if (!local || local === "0") return true;
-            const rParts = remote.split('.').map(Number);
-            const lParts = local.split('.').map(Number);
-            for (let i = 0; i < Math.max(rParts.length, lParts.length); i++) {
-                const r = rParts[i] || 0;
-                const l = lParts[i] || 0;
-                if (r > l) return true;
-                if (r < l) return false;
-            }
-            return false;
-        }
+<!-- نافذة التفعيل -->
+<div id="sheet-key" class="sheet-wrap hidden" role="dialog" aria-modal="true">
+  <div class="sheet-bg" data-close></div>
+  <div class="sheet">
+    <div class="grab"></div>
+    <h2>تفعيل BacAI</h2>
+    <p class="muted" style="font-size:13.5px">يعمل BacAI بمفتاح تفعيل مجاني من Google. يُحفظ المفتاح على جهازك فقط.</p>
+    <ol class="steps-list">
+      <li>اضغط «فتح صفحة المفتاح» وسجّل الدخول بحساب Google.</li>
+      <li>أنشئ مفتاحاً جديداً ثم انسخه.</li>
+      <li>ارجع إلى هنا والصقه في الخانة أدناه.</li>
+    </ol>
+    <button id="key-open" class="btn secondary block">فتح صفحة المفتاح</button>
+    <div class="field">
+      <input id="key-input" type="password" placeholder="الصق المفتاح هنا" autocomplete="off" spellcheck="false">
+      <button id="key-paste" class="btn secondary sm">لصق</button>
+    </div>
+    <div id="key-error" class="err-line"></div>
+    <button id="key-save" class="btn primary block">تفعيل</button>
+  </div>
+</div>
 
-        async function loadLessonsFromZip(zipBlob) {
-            const zip = new JSZip();
-            const contents = await zip.loadAsync(zipBlob);
-            const loadedLessons = [];
+<!-- نافذة الإعدادات -->
+<div id="sheet-settings" class="sheet-wrap hidden" role="dialog" aria-modal="true">
+  <div class="sheet-bg" data-close></div>
+  <div class="sheet">
+    <div class="grab"></div>
+    <h2>الإعدادات</h2>
+    <div>
+      <div class="set-row">
+        <div><b>التفعيل</b><span class="m" id="set-key">—</span></div>
+        <button id="set-key-change" class="btn secondary sm">تغيير</button>
+      </div>
+      <div class="set-row">
+        <div><b>الدروس</b><span class="m" id="set-lessons">—</span></div>
+        <button id="set-lessons-update" class="btn secondary sm">تحديث</button>
+      </div>
+      <div class="set-row">
+        <div><b>السجل</b><span class="m" id="set-history">—</span></div>
+        <button id="set-history-clear" class="btn secondary sm">مسح</button>
+      </div>
+    </div>
+    <button id="set-key-remove" class="btn danger block">إزالة مفتاح التفعيل من هذا الجهاز</button>
+    <p class="foot"><span id="ver">BacAI · الإصدار 1.0</span><br>تُرسل الصور مباشرة من جهازك إلى Google لمعالجتها.</p>
+  </div>
+</div>
 
-            for (let filename of Object.keys(contents.files)) {
-                const fileObj = contents.files[filename];
-                if (fileObj.dir || (!filename.endsWith('.txt') && !filename.endsWith('.md'))) continue;
+<input id="in-cam" type="file" accept="image/*" capture="environment" hidden>
+<input id="in-gal" type="file" accept="image/*" multiple hidden>
+<div id="toast" class="toast" role="status"></div>
 
-                const raw = await fileObj.async("text");
-                const descMatch = raw.match(/===\s*الوصف\s*===([\s\S]*?)(?=^===|\Z)/m);
-                if (!descMatch) continue;
+<script>
+(function () {
+'use strict';
 
-                const desc = descMatch[1].trim();
-                const idMatch = desc.match(/^\s*id\s*:\s*(.+)$/m);
-                const titleMatch = desc.match(/^\s*العنوان\s*:\s*(.+)$/m);
-                const stem = filename.split('/').pop().replace(/\.[^/.]+$/, "");
+/* ===================== الإعدادات ===================== */
+const GITHUB_USER = "Raoufsb";
+const REPO_NAME = "BacIslam-AI";
+const VERSION_URL = `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${REPO_NAME}@main/version.txt`;
+const ZIP_URL = `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${REPO_NAME}@main/دروس.zip`;
+const MODEL = 'gemini-3.5-flash-lite';
+const API_VERSION = 'v1beta';
+const KEY_PAGE = 'https://aistudio.google.com/apikey';
+const BOT_LINK = '';            // رابط البوت، مثال: https://t.me/اسم_البوت
+const APP_VERSION = '1.0';
+const MAX_IMAGES = 8;           // أقصى عدد صور في الطلب الواحد
+const MAX_SIDE = 1800;          // أكبر بُعد للصورة بعد الضغط
+const PARALLEL = 3;             // عدد التمارين التي تُحل معًا
+const RETRY_DELAYS = [3000, 8000];
 
-                loadedLessons.push({
-                    id: idMatch ? idMatch[1].trim() : stem,
-                    title: titleMatch ? titleMatch[1].trim() : stem,
-                    raw: raw
-                });
-            }
-            return loadedLessons;
-        }
-
-        async function initLessonsSync() {
-            const syncModal = document.getElementById('sync-modal');
-            const syncModalText = document.getElementById('sync-modal-text');
-            const headerStatus = document.getElementById('header-status');
-
-            try {
-                syncModalText.innerText = "🔍 جاري التحقق من إصدار الدروس...";
-                
-                const localVersion = localStorage.getItem('lessons_version') || "0";
-                let remoteVersion = "1.0.0";
-                
-                try {
-                    const verRes = await fetch(VERSION_URL + "?t=" + Date.now());
-                    if (verRes.ok) {
-                        remoteVersion = (await verRes.text()).trim();
-                    }
-                } catch (e) {
-                    console.warn("فشل الاتصال لجلب الإصدار، سيتم الاعتماد على النسخة المحلية.");
-                }
-
-                const cachedLessons = localStorage.getItem('cached_lessons');
-
-                if (!cachedLessons || isNewerVersion(remoteVersion, localVersion)) {
-                    syncModalText.innerText = `📥 يتوفر إصدار جديد (${remoteVersion}). جاري تحميل دروس.zip...`;
-                    
-                    const zipRes = await fetch(ZIP_URL + "?t=" + Date.now());
-                    if (!zipRes.ok) throw new Error("تعذر تحميل ملف دروس.zip من الـ CDN");
-                    const zipBlob = await zipRes.blob();
-
-                    syncModalText.innerText = "⚙️ جاري فك ضغط وقراءة الدروس...";
-                    LESSONS = await loadLessonsFromZip(zipBlob);
-
-                    localStorage.setItem('cached_lessons', JSON.stringify(LESSONS));
-                    localStorage.setItem('lessons_version', remoteVersion);
-                    headerStatus.innerText = `جاهز (${LESSONS.length} درس - v${remoteVersion})`;
-                } else {
-                    LESSONS = JSON.parse(cachedLessons);
-                    headerStatus.innerText = `جاهز (${LESSONS.length} درس موازن)`;
-                }
-
-                setTimeout(() => {
-                    syncModal.classList.add('hidden');
-                }, 400);
-
-            } catch (err) {
-                console.error("خطأ في المزامنة:", err);
-                const cached = localStorage.getItem('cached_lessons');
-                if (cached) {
-                    LESSONS = JSON.parse(cached);
-                    headerStatus.innerText = "وضع عدم الاتصال";
-                    syncModal.classList.add('hidden');
-                } else {
-                    syncModalText.innerText = "❌ فشل تحميل الدروس. تحقق من الاتصال بالإنترنت.";
-                }
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            await initLessonsSync();
-        });
-
-        const READ_SYSTEM = `أنت تقرأ صور موضوع امتحان (أو تمرين) في مادة العلوم الإسلامية. قد تحوي الصور موضوعاً كاملاً بعدة تمارين، أو تمريناً واحداً، أو جزءاً من صفحة.
+/* ===================== البرومتات ===================== */
+const READ_SYSTEM = `أنت تقرأ صور موضوع امتحان (أو تمرين) في مادة العلوم الإسلامية. قد تحوي الصور موضوعاً كاملاً بعدة تمارين، أو تمريناً واحداً، أو جزءاً من صفحة.
 مهمتك: استخراج كل تمرين على حدة، وإخراجه بصيغة JSON فقط:
 {"exercises": [{"label": "...", "text": "..."}], "note": "..."}
 القواعد:
@@ -284,14 +338,14 @@
 - note يبقى فارغاً في الحالة العادية.
 - لا تحل الأسئلة في هذه المرحلة.`;
 
-        const SELECT_SYSTEM = `أمامك قائمة دروس بأوصافها، وتمرين من موضوع في العلوم الإسلامية.
+const SELECT_SYSTEM = `أمامك قائمة دروس بأوصافها، وتمرين من موضوع في العلوم الإسلامية.
 اختر الدروس اللازمة لحل هذا التمرين. يجوز اختيار أكثر من درس.
 اختيار درس زائد أفضل من درس ناقص. إن لم يناسب أي درس من القائمة فاجعل القائمة فارغة.
 استعمل معرّفات الدروس كما هي في القائمة فقط.
 أخرج JSON فقط:
 {"lessons": ["معرّف"], "reason": "جملة قصيرة"}`;
 
-        const SOLVE_SYSTEM = `أنت أستاذ العلوم الإسلامية للبكالوريا الجزائرية. تحل التمرين كما يُنتظر في ورقة الإجابة النموذجية.
+const SOLVE_SYSTEM = `أنت أستاذ العلوم الإسلامية للبكالوريا الجزائرية. تحل التمرين كما يُنتظر في ورقة الإجابة النموذجية.
 القواعد:
 - اعتمد على الدروس المرفقة مرجعًا أول والتزم بمصطلحاتها وعباراتها. وإن لم يرد الجواب فيها نصًا فاستنتجه منها، أو أجب بما هو معلوم بداهة في مستوى البكالوريا الجزائرية، بإيجاز وبمصطلحات الدروس. لا تخترع أرقامًا ولا أسماء ولا أقوال علماء لم ترد.
 - اتبع "أنواع الأسئلة وطريقة حلها" و"الأمثلة المحلولة" في الدروس من حيث الشكل والطول والمصطلحات.
@@ -303,246 +357,679 @@
 - لا مقدمات ولا خاتمة ولا تعليق على الموضوع. الإجابة فقط.
 - لا تكتب "خارج الدروس المتوفرة" إلا إذا كان السؤال في موضوع لا علاقة له بأي من الدروس المرفقة ولا تستطيع الإجابة عنه بيقين. وفيما عدا ذلك أجب دائمًا.`;
 
-        let selectedFiles = [];
+/* <pure> */
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function normId(x) { return String(x).trim().replace(/^0+/, '') || '0'; }
+function isNewerVersion(remote, local) {
+  if (!local || local === '0') return true;
+  const r = String(remote).split('.').map(Number), l = String(local).split('.').map(Number);
+  for (let i = 0; i < Math.max(r.length, l.length); i++) {
+    const a = r[i] || 0, b = l[i] || 0;
+    if (a > b) return true;
+    if (a < b) return false;
+  }
+  return false;
+}
+function parseLesson(raw, stem) {
+  raw = String(raw).replace(/^\uFEFF/, '');
+  const m = raw.match(/===\s*الوصف\s*===([\s\S]*?)(?=^===|$(?![\s\S]))/m);
+  if (!m) return null;
+  const desc = m[1].trim();
+  const idM = desc.match(/^\s*id\s*:\s*(.+)$/m);
+  const tM = desc.match(/^\s*العنوان\s*:\s*(.+)$/m);
+  const body = desc.split('\n').filter(l => !/^\s*(id|العنوان)\s*:/.test(l)).join('\n').trim();
+  return {
+    id: idM ? idM[1].trim() : stem,
+    title: tM ? tM[1].trim() : stem,
+    desc: body,
+    raw: raw
+  };
+}
+function parseJson(text) {
+  const s = text.indexOf('{'), e = text.lastIndexOf('}');
+  if (s < 0 || e < s) throw new Error('bad json');
+  return JSON.parse(text.slice(s, e + 1));
+}
+function formatSolution(text) {
+  return String(text).replace(/\r/g, '').split('\n').map(line => {
+    if (!line.trim()) return '<div class="sp"></div>';
+    const lvl = Math.min(3, Math.floor(line.match(/^\s*/)[0].length / 2));
+    let t = line.trim().replace(/^#{1,6}\s*/, '');
+    let bullet = false;
+    const bm = t.match(/^[*\-•]\s+(.*)$/);
+    if (bm) { bullet = true; t = bm[1]; }
+    t = escapeHtml(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    return `<div class="ln l${lvl}${bullet ? ' b' : ''}">${t}</div>`;
+  }).join('');
+}
+async function pool(items, limit, worker) {
+  const results = new Array(items.length);
+  let next = 0;
+  async function run() {
+    while (true) {
+      const i = next++;
+      if (i >= items.length) return;
+      results[i] = await worker(items[i], i);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, run));
+  return results;
+}
+/* </pure> */
 
-        const imageInput = document.getElementById('image-input');
-        const previewContainer = document.getElementById('preview-container');
-        const solveBtn = document.getElementById('solve-btn');
-        const statusCard = document.getElementById('status-card');
-        const statusTitle = document.getElementById('status-title');
-        const statusPercent = document.getElementById('status-percent');
-        const progressBar = document.getElementById('progress-bar');
-        const resultsContainer = document.getElementById('results-container');
-        const solutionsList = document.getElementById('solutions-list');
-        const usageStats = document.getElementById('usage-stats');
-        const apiKeyBanner = document.getElementById('api-key-banner');
-        const settingsModal = document.getElementById('settings-modal');
-        const apiKeyInput = document.getElementById('api-key-input');
-        const saveKeyBtn = document.getElementById('save-key-btn');
-        const settingsBtn = document.getElementById('settings-btn');
-        const closeSettings = document.getElementById('close-settings');
-        const openSettingsInline = document.getElementById('open-settings-inline');
-        const resetBtn = document.getElementById('reset-btn');
+/* ===================== أدوات عامة ===================== */
+const $ = (s, r) => (r || document).querySelector(s);
+const sleep = (ms, signal) => new Promise((res, rej) => {
+  const t = setTimeout(res, ms);
+  if (signal) signal.addEventListener('abort', () => { clearTimeout(t); rej(new DOMException('Aborted', 'AbortError')); }, { once: true });
+});
 
-        function getApiKey() {
-            return localStorage.getItem('gemini_api_key') || '';
-        }
+const mem = {};
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? (d === undefined ? null : d) : v; } catch (e) { return k in mem ? mem[k] : (d === undefined ? null : d); } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { mem[k] = v; } },
+  del(k) { try { localStorage.removeItem(k); } catch (e) { delete mem[k]; } }
+};
 
-        function checkApiKey() {
-            const key = getApiKey();
-            if (!key) {
-                apiKeyBanner.classList.remove('hidden');
-            } else {
-                apiKeyBanner.classList.add('hidden');
-                apiKeyInput.value = key;
-            }
-        }
-        checkApiKey();
+const ICONS = {
+  camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M21 16l-5-5-8 8"/>',
+  settings: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
+  history: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>',
+  check: '<path d="M5 12l5 5 9-10"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h7M8 11h5"/>',
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>'
+};
+const icon = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ''}</svg>`;
+function injectIcons(root) {
+  (root || document).querySelectorAll('[data-i]').forEach(el => { el.innerHTML = icon(el.dataset.i); el.removeAttribute('data-i'); });
+}
 
-        settingsBtn.onclick = () => settingsModal.classList.remove('hidden');
-        openSettingsInline.onclick = () => settingsModal.classList.remove('hidden');
-        closeSettings.onclick = () => settingsModal.classList.add('hidden');
-        
-        saveKeyBtn.onclick = () => {
-            const val = apiKeyInput.value.trim();
-            if (val) {
-                localStorage.setItem('gemini_api_key', val);
-                settingsModal.classList.add('hidden');
-                checkApiKey();
-                alert('تم حفظ المفتاح بنجاح!');
-            } else {
-                alert('الرجاء إدخال مفتاح صحيح.');
-            }
-        };
+const tg = window.Telegram && window.Telegram.WebApp;
+const DEV = location.hash === '#dev' || store.get('bacai_dev') === '1';
+const inTelegram = !!(tg && tg.initData);
 
-        imageInput.onchange = (e) => handleFiles(e.target.files);
+function hap(type) {
+  try {
+    if (!tg || !tg.HapticFeedback) return;
+    if (type === 'tap') tg.HapticFeedback.impactOccurred('light');
+    else tg.HapticFeedback.notificationOccurred(type);
+  } catch (e) {}
+}
+let toastTimer;
+function toast(msg, kind) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (kind === 'error' ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, 3200);
+}
+function openLink(url) {
+  if (tg && tg.openLink) tg.openLink(url); else window.open(url, '_blank', 'noopener');
+}
+function applyTheme() {
+  const scheme = tg && tg.colorScheme ? tg.colorScheme
+    : (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  document.documentElement.dataset.theme = scheme;
+  const c = scheme === 'light' ? '#f4f7fb' : '#0b1220';
+  try { if (tg) { tg.setHeaderColor(c); tg.setBackgroundColor(c); } } catch (e) {}
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch (e) { return false; }
+}
+function setBusy(btn, busy, label) {
+  if (busy) { btn.dataset.t = btn.innerHTML; btn.textContent = label || '…'; btn.disabled = true; }
+  else { if (btn.dataset.t) btn.innerHTML = btn.dataset.t; btn.disabled = false; }
+}
 
-        async function handleFiles(files) {
-            for (let file of files) {
-                const base64 = await toBase64(file);
-                selectedFiles.push({
-                    file: file,
-                    base64: base64.split(',')[1],
-                    mimeType: file.type || 'image/jpeg'
-                });
-            }
-            renderPreviews();
-        }
+/* ===================== الأخطاء ===================== */
+class AppError extends Error { constructor(code, detail) { super(detail || code); this.code = code; } }
+const MESSAGES = {
+  NO_KEY: 'فعّل التطبيق أولاً بإدخال مفتاح التفعيل.',
+  KEY_INVALID: 'مفتاح التفعيل غير مقبول. تأكد من نسخه كاملاً أو أنشئ مفتاحاً جديداً.',
+  RATE: 'الخدمة مشغولة حالياً أو بلغتَ الحد المسموح لمفتاحك. انتظر قليلاً ثم حاول مجدداً.',
+  SERVER: 'الخدمة غير متاحة مؤقتاً. حاول بعد قليل.',
+  NETWORK: 'تعذّر الاتصال بالإنترنت. تحقق من اتصالك وحاول مجدداً.',
+  EMPTY: 'لم يصل جواب واضح. أعد المحاولة.',
+  BLOCKED: 'تعذّرت معالجة هذا المحتوى. جرّب صورة أخرى.',
+  BAD: 'تعذّرت معالجة الطلب. جرّب صوراً أوضح.',
+  READ: 'لم أستطع قراءة الصور بوضوح. التقط صورة أوضح وأكثر إضاءة.'
+};
+const friendly = e => MESSAGES[e && e.code] || 'حدث خطأ غير متوقع. حاول مرة أخرى.';
 
-        function toBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
+async function httpError(res) {
+  let msg = '';
+  try { const j = await res.json(); msg = ((j.error && j.error.message) || '') + ' ' + ((j.error && j.error.status) || ''); } catch (e) {}
+  const m = msg.toLowerCase();
+  if (res.status === 401 || res.status === 403 || (res.status === 400 && (m.includes('api key') || m.includes('api_key')))) return new AppError('KEY_INVALID', msg);
+  if (res.status === 429) return new AppError('RATE', msg);
+  if (res.status >= 500) return new AppError('SERVER', msg);
+  return new AppError('BAD', msg);
+}
 
-        function renderPreviews() {
-            if (selectedFiles.length > 0) {
-                previewContainer.classList.remove('hidden');
-                solveBtn.removeAttribute('disabled');
-                previewContainer.innerHTML = selectedFiles.map((item, index) => `
-                    <div class="relative group aspect-square rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
-                        <img src="data:${item.mimeType};base64,${item.base64}" class="w-full h-full object-cover">
-                        <button onclick="window.removeImage(${index})" class="absolute top-1 right-1 bg-red-600/80 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] transition">✕</button>
-                    </div>
-                `).join('');
-            } else {
-                previewContainer.classList.add('hidden');
-                solveBtn.setAttribute('disabled', 'true');
-            }
-        }
+/* ===================== الاتصال بالنموذج ===================== */
+const getKey = () => store.get('gemini_api_key', '') || '';
+const endpoint = () => `https://generativelanguage.googleapis.com/${API_VERSION}/models/${MODEL}:generateContent`;
 
-        window.removeImage = (index) => {
-            selectedFiles.splice(index, 1);
-            renderPreviews();
-        };
+let usage = null;
+const newUsage = () => ({ read: { in: 0, out: 0, calls: 0 }, select: { in: 0, out: 0, calls: 0 }, solve: { in: 0, out: 0, calls: 0 } });
+function record(stage, data) {
+  const u = data.usageMetadata;
+  if (!u || !usage || !usage[stage]) return;
+  usage[stage].in += u.promptTokenCount || 0;
+  usage[stage].out += (u.candidatesTokenCount || 0) + (u.thoughtsTokenCount || 0);
+  usage[stage].calls++;
+}
+function extractText(data) {
+  if (data.promptFeedback && data.promptFeedback.blockReason) throw new AppError('BLOCKED');
+  const c = data.candidates && data.candidates[0];
+  if (!c || !c.content || !c.content.parts) return '';
+  const text = c.content.parts.filter(p => !p.thought && typeof p.text === 'string').map(p => p.text).join('').trim();
+  if (!text && c.finishReason === 'SAFETY') throw new AppError('BLOCKED');
+  return text;
+}
+async function callModel({ system, parts, json, stage, signal }) {
+  const key = getKey();
+  if (!key) throw new AppError('NO_KEY');
+  const body = { systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts }] };
+  if (json) body.generationConfig = { responseMimeType: 'application/json' };
+  let lastErr;
+  for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+    try {
+      const res = await fetch(endpoint(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify(body),
+        signal
+      });
+      if (!res.ok) throw await httpError(res);
+      const data = await res.json();
+      record(stage, data);
+      const text = extractText(data);
+      if (!text) throw new AppError('EMPTY');
+      return text;
+    } catch (e) {
+      if (e && e.name === 'AbortError') throw e;
+      lastErr = e instanceof AppError ? e : new AppError('NETWORK', e && e.message);
+      const retryable = ['RATE', 'SERVER', 'NETWORK', 'EMPTY'].includes(lastErr.code);
+      if (!retryable || attempt === RETRY_DELAYS.length) throw lastErr;
+      await sleep(RETRY_DELAYS[attempt], signal);
+    }
+  }
+  throw lastErr;
+}
+async function validateKey(key) {
+  let res;
+  try {
+    res = await fetch(endpoint(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'ok' }] }], generationConfig: { maxOutputTokens: 8 } })
+    });
+  } catch (e) { throw new AppError('NETWORK'); }
+  if (res.ok || res.status === 429) return true;
+  throw await httpError(res);
+}
 
-        resetBtn.onclick = () => {
-            selectedFiles = [];
-            renderPreviews();
-            resultsContainer.classList.add('hidden');
-            statusCard.classList.add('hidden');
-        };
+/* ===================== الدروس ===================== */
+let LESSONS = [];
+let catalogText = '';
+function buildCatalog() {
+  catalogText = LESSONS.map(l => `[${l.id}] ${l.title}\n${l.desc}`).join('\n\n');
+}
+function loadCachedLessons() {
+  try {
+    const c = store.get('cached_lessons');
+    if (!c) return;
+    const arr = JSON.parse(c);
+    LESSONS = arr.map(l => {
+      if (l.desc === undefined) { const p = parseLesson(l.raw, l.id); l.desc = p ? p.desc : ''; }
+      return l;
+    });
+    buildCatalog();
+  } catch (e) { LESSONS = []; }
+}
+async function loadLessonsFromZip(blob) {
+  const zip = await JSZip.loadAsync(blob);
+  const out = [];
+  for (const name of Object.keys(zip.files)) {
+    const f = zip.files[name];
+    const base = name.split('/').pop();
+    if (f.dir || name.startsWith('__MACOSX') || base.startsWith('._')) continue;
+    if (!/\.(txt|md)$/i.test(name)) continue;
+    const raw = await f.async('string');
+    const l = parseLesson(raw, base.replace(/\.[^/.]+$/, ''));
+    if (l) out.push(l);
+  }
+  return out;
+}
+async function syncLessons(force) {
+  const localV = store.get('lessons_version', '0');
+  let remoteV = null;
+  try {
+    const r = await fetch(VERSION_URL + '?t=' + Date.now());
+    if (r.ok) remoteV = (await r.text()).trim();
+  } catch (e) {}
+  const needs = force || LESSONS.length === 0 || (remoteV && isNewerVersion(remoteV, localV));
+  if (!needs) return false;
+  const zr = await fetch(ZIP_URL + '?t=' + Date.now());
+  if (!zr.ok) throw new Error('zip');
+  const lessons = await loadLessonsFromZip(await zr.blob());
+  if (!lessons.length) throw new Error('empty');
+  LESSONS = lessons;
+  buildCatalog();
+  store.set('cached_lessons', JSON.stringify(LESSONS));
+  store.set('lessons_version', remoteV || localV || '1.0.0');
+  return true;
+}
 
-        solveBtn.onclick = async () => {
-            const apiKey = getApiKey();
-            if (!apiKey) {
-                settingsModal.classList.remove('hidden');
-                return;
-            }
+/* ===================== الصور ===================== */
+let images = []; // { id, blob, url }
+let imgSeq = 0;
+function loadImg(file) {
+  return new Promise((res, rej) => {
+    const u = URL.createObjectURL(file);
+    const im = new Image();
+    im.onload = () => { URL.revokeObjectURL(u); res(im); };
+    im.onerror = () => { URL.revokeObjectURL(u); rej(new Error('img')); };
+    im.src = u;
+  });
+}
+async function compress(file) {
+  let bmp;
+  try { bmp = await createImageBitmap(file); } catch (e) { bmp = await loadImg(file); }
+  const w = bmp.width || bmp.naturalWidth, h = bmp.height || bmp.naturalHeight;
+  const k = Math.min(1, MAX_SIDE / Math.max(w, h));
+  const cw = Math.round(w * k), ch = Math.round(h * k);
+  const cv = document.createElement('canvas');
+  cv.width = cw; cv.height = ch;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cw, ch);
+  ctx.drawImage(bmp, 0, 0, cw, ch);
+  return new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error('blob')), 'image/jpeg', 0.88));
+}
+function blobToBase64(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result).split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+}
+async function addFiles(fileList) {
+  for (const file of Array.from(fileList)) {
+    if (images.length >= MAX_IMAGES) { toast(`الحد الأقصى ${MAX_IMAGES} صور في المرة الواحدة.`); break; }
+    try {
+      const blob = await compress(file);
+      images.push({ id: ++imgSeq, blob, url: URL.createObjectURL(blob) });
+    } catch (e) { toast('تعذّر فتح إحدى الصور. جرّب صورة أخرى.', 'error'); }
+  }
+  renderThumbs();
+}
+function renderThumbs() {
+  const box = $('#thumbs');
+  box.classList.toggle('hidden', images.length === 0);
+  box.innerHTML = images.map(im =>
+    `<div class="thumb"><img src="${im.url}" alt=""><button data-rm="${im.id}" aria-label="حذف">${icon('close')}</button></div>`).join('');
+  $('#btn-solve').disabled = images.length === 0;
+  $('#pick-hint').textContent = images.length
+    ? `${images.length} ${images.length === 1 ? 'صورة جاهزة' : 'صور جاهزة'}. يمكنك إضافة المزيد.`
+    : 'أضف صورة واضحة ومضاءة تُظهر كامل الأسئلة. يمكنك إضافة عدة صور.';
+}
+function clearImages() {
+  images.forEach(im => URL.revokeObjectURL(im.url));
+  images = [];
+  renderThumbs();
+}
 
-            // تم إصلاح إصدار الـ API ليدعم v1beta وتعيين النموذج الصحيح
-            const ai = new GoogleGenAI({ apiKey: apiKey, apiVersion: 'v1beta' });
-            const modelName = 'gemini-3.5-flash-lite';
+/* ===================== العرض ===================== */
+const VIEWS = ['home', 'working', 'result', 'history'];
+let current = 'home';
+function show(v) {
+  current = v;
+  VIEWS.forEach(n => $('#view-' + n).classList.toggle('hidden', n !== v));
+  try {
+    if (tg && tg.BackButton) { (v === 'result' || v === 'history') ? tg.BackButton.show() : tg.BackButton.hide(); }
+  } catch (e) {}
+  window.scrollTo(0, 0);
+}
+function openSheet(name) { $('#sheet-' + name).classList.remove('hidden'); }
+function closeSheets() { document.querySelectorAll('.sheet-wrap').forEach(s => s.classList.add('hidden')); }
+const sheetOpen = () => !!document.querySelector('.sheet-wrap:not(.hidden)');
 
-            statusCard.classList.remove('hidden');
-            resultsContainer.classList.add('hidden');
-            solveBtn.setAttribute('disabled', 'true');
-            
-            let totalIn = 0, totalOut = 0, totalCalls = 0;
+function refreshHome() {
+  $('#banner-key').classList.toggle('hidden', !!getKey());
+  $('#banner-lessons').classList.toggle('hidden', LESSONS.length > 0);
+}
+function renderSettings() {
+  const k = getKey();
+  $('#set-key').textContent = k ? 'مفعّل · ••••' + k.slice(-4) : 'غير مفعّل';
+  $('#set-key-remove').classList.toggle('hidden', !k);
+  $('#set-lessons').textContent = LESSONS.length
+    ? `${LESSONS.length} درساً · الإصدار ${store.get('lessons_version', '—')}` : 'غير محمّلة';
+  $('#set-history').textContent = `${loadHistory().length} موضوعاً محفوظاً`;
+}
 
-            try {
-                updateStatus('قراءة الصور واستخراج التمارين...', 25);
-                
-                const imageParts = selectedFiles.map(img => ({
-                    inlineData: { data: img.base64, mimeType: img.mimeType }
-                }));
+/* ===================== السجل ===================== */
+let lastResult = null; // { items, usage, hid }
+function loadHistory() {
+  try { const h = JSON.parse(store.get('bacai_history', '[]')); return Array.isArray(h) ? h : []; } catch (e) { return []; }
+}
+function saveHistory(items) {
+  const hist = loadHistory();
+  const id = Date.now();
+  hist.unshift({ id, items: items.map(i => ({ label: i.label, solution: i.solution, status: i.status })) });
+  store.set('bacai_history', JSON.stringify(hist.slice(0, 15)));
+  return id;
+}
+function updateHistory() {
+  if (!lastResult || !lastResult.hid) return;
+  const hist = loadHistory();
+  const h = hist.find(x => x.id === lastResult.hid);
+  if (!h) return;
+  h.items = lastResult.items.map(i => ({ label: i.label, solution: i.solution, status: i.status }));
+  store.set('bacai_history', JSON.stringify(hist));
+}
+function renderHistory() {
+  const hist = loadHistory();
+  const box = $('#hist-list');
+  if (!hist.length) { box.innerHTML = '<div class="empty">لا توجد مواضيع محفوظة بعد.</div>'; return; }
+  box.innerHTML = hist.map(h => {
+    const d = new Date(h.id).toLocaleString('ar-DZ', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+    const first = (h.items[0] && h.items[0].solution || '').replace(/\s+/g, ' ').slice(0, 70);
+    return `<button class="card h-item" data-h="${h.id}"><b>${escapeHtml(h.items.length === 1 ? h.items[0].label : h.items.length + ' تمارين')}</b><span>${escapeHtml(d)}</span><span>${escapeHtml(first)}${first.length >= 70 ? '…' : ''}</span></button>`;
+  }).join('');
+}
 
-                const readResp = await ai.models.generateContent({
-                    model: modelName,
-                    contents: ["اقرأ الصور المرفقة واستخرج التمارين بدقة.", ...imageParts],
-                    config: { systemInstruction: READ_SYSTEM, responseMimeType: "application/json" }
-                });
+/* ===================== الحل ===================== */
+function cardHtml(item, idx) {
+  const badge = item.status === 'general'
+    ? '<div class="badge">لم يُعثر على درس مطابق لهذا التمرين، فالإجابة عامة وتحتاج إلى مراجعتك.</div>' : '';
+  let body;
+  if (item.status === 'error') {
+    body = `<div class="err-box">${escapeHtml(item.error || 'تعذّر حل هذا التمرين.')}</div>` +
+      (item.text ? `<button class="btn secondary sm" data-retry="${idx}">إعادة المحاولة</button>` : '');
+  } else {
+    body = `<div class="sol">${formatSolution(item.solution)}</div>`;
+  }
+  const copyBtn = item.status === 'error' ? '' :
+    `<button class="icon-btn sm" data-copy="${idx}" aria-label="نسخ">${icon('copy')}</button>`;
+  return `<article class="card sol-card"><div class="sol-head"><span class="chip">${escapeHtml(item.label)}</span>${copyBtn}</div>${badge}${body}</article>`;
+}
+function renderResult() {
+  const items = lastResult.items;
+  const ok = items.filter(i => i.status !== 'error').length;
+  $('#res-title').textContent = items.length === 1 ? 'حلّ التمرين' : `حلّ الموضوع (${items.length} تمارين)`;
+  $('#res-sub').textContent = ok === items.length ? 'اكتمل الحل' : `تم حل ${ok} من ${items.length}`;
+  $('#res-list').innerHTML = items.map(cardHtml).join('');
+  const dev = $('#res-dev');
+  if (DEV && lastResult.usage) {
+    const u = lastResult.usage;
+    const tin = u.read.in + u.select.in + u.solve.in, tout = u.read.out + u.select.out + u.solve.out;
+    dev.classList.remove('hidden');
+    dev.textContent = `in ${tin} | out ${tout} | total ${tin + tout}\nread ${u.read.in}/${u.read.out} (${u.read.calls})\nselect ${u.select.in}/${u.select.out} (${u.select.calls})\nsolve ${u.solve.in}/${u.solve.out} (${u.solve.calls})`;
+  } else dev.classList.add('hidden');
+}
 
-                if (readResp.usageMetadata) {
-                    totalIn += readResp.usageMetadata.promptTokenCount || 0;
-                    totalOut += (readResp.usageMetadata.candidatesTokenCount || 0) + (readResp.usageMetadata.thoughtsTokenCount || 0);
-                    totalCalls++;
-                }
+async function selectLessons(text, signal) {
+  const out = await callModel({
+    system: SELECT_SYSTEM,
+    parts: [{ text: `قائمة الدروس:\n${catalogText}\n\nالتمرين:\n${text}` }],
+    json: true, stage: 'select', signal
+  });
+  try {
+    const d = parseJson(out);
+    const wanted = new Set((d.lessons || []).map(normId));
+    return LESSONS.filter(l => wanted.has(normId(l.id)));
+  } catch (e) { return []; }
+}
+async function solveOne(ex, signal) {
+  const label = String(ex.label || '').trim() || 'التمرين';
+  try {
+    const chosen = await selectLessons(ex.text, signal);
+    const lessonsText = chosen.map(l => `########## الدرس ${l.id}: ${l.title} ##########\n${l.raw}`).join('\n\n');
+    const sol = await callModel({
+      system: SOLVE_SYSTEM,
+      parts: [{ text: `الدروس:\n${lessonsText}\n\nالتمرين (${label}):\n${ex.text}` }],
+      stage: 'solve', signal
+    });
+    return { label, text: ex.text, solution: sol.trim(), status: chosen.length ? 'ok' : 'general' };
+  } catch (e) {
+    if (e && e.name === 'AbortError') throw e;
+    if (e && (e.code === 'KEY_INVALID' || e.code === 'NO_KEY')) throw e;
+    return { label, text: ex.text, solution: '', status: 'error', error: friendly(e) };
+  }
+}
 
-                const readData = JSON.parse(readResp.text.trim());
-                const exercises = (readData.exercises || []).filter(e => e.text && e.text.trim());
+let working = false, abortCtl = null;
+function setStep(name) {
+  const r = $('#st-read'), s = $('#st-solve');
+  r.className = name === 'read' ? 'active' : 'done';
+  s.className = name === 'solve' ? 'active' : '';
+  r.querySelector('.dot').innerHTML = name === 'read' ? '' : icon('check');
+}
+function setProgress(p) { $('#bar').style.width = p + '%'; }
 
-                if (exercises.length === 0) {
-                    alert(readData.note || "لم أجد تمريناً واضحاً في الصور.");
-                    statusCard.classList.add('hidden');
-                    solveBtn.removeAttribute('disabled');
-                    return;
-                }
+async function run() {
+  if (working || !images.length) return;
+  if (!getKey()) { openSheet('key'); return; }
+  if (!LESSONS.length) {
+    toast('جارٍ تحميل الدروس…');
+    try { await syncLessons(true); } catch (e) {}
+    refreshHome();
+    if (!LESSONS.length) { toast('تعذّر تحميل الدروس. تحقق من الاتصال.', 'error'); return; }
+  }
+  working = true;
+  abortCtl = new AbortController();
+  const signal = abortCtl.signal;
+  usage = newUsage();
+  show('working');
+  $('#work-title').textContent = 'جارٍ قراءة الموضوع…';
+  $('#st-solve-text').textContent = 'إعداد الحلول';
+  setStep('read'); setProgress(6);
+  try { if (tg && tg.enableClosingConfirmation) tg.enableClosingConfirmation(); } catch (e) {}
+  try {
+    const parts = [{ text: 'اقرأ الصور المرفقة واستخرج التمارين بدقة.' }];
+    for (const im of images) parts.push({ inlineData: { mimeType: 'image/jpeg', data: await blobToBase64(im.blob) } });
+    setProgress(12);
+    const readText = await callModel({ system: READ_SYSTEM, parts, json: true, stage: 'read', signal });
+    let data;
+    try { data = parseJson(readText); } catch (e) { throw new AppError('READ'); }
+    const exercises = (data.exercises || []).filter(e => e && e.text && String(e.text).trim());
+    if (!exercises.length) {
+      show('home');
+      toast(data.note || 'لم أجد تمريناً واضحاً في الصور. التقط صورة أوضح.', 'error');
+      return;
+    }
+    const n = exercises.length;
+    setStep('solve'); setProgress(30);
+    $('#work-title').textContent = 'جارٍ إعداد الحلول…';
+    $('#st-solve-text').textContent = n === 1 ? 'إعداد الحل' : `إعداد الحلول (0 من ${n})`;
+    let done = 0;
+    const items = await pool(exercises, PARALLEL, async ex => {
+      const it = await solveOne(ex, signal);
+      done++;
+      setProgress(30 + Math.round(65 * done / n));
+      if (n > 1) $('#st-solve-text').textContent = `إعداد الحلول (${done} من ${n})`;
+      return it;
+    });
+    setProgress(100);
+    const hid = saveHistory(items);
+    lastResult = { items, usage, hid };
+    renderResult();
+    show('result');
+    hap(items.every(i => i.status !== 'error') ? 'success' : 'warning');
+  } catch (e) {
+    show('home');
+    if (e && e.name === 'AbortError') toast('تم الإلغاء');
+    else {
+      hap('error');
+      toast(friendly(e), 'error');
+      if (e && e.code === 'KEY_INVALID') { renderSettings(); $('#key-error').textContent = MESSAGES.KEY_INVALID; openSheet('key'); }
+    }
+  } finally {
+    working = false; abortCtl = null;
+    try { if (tg && tg.disableClosingConfirmation) tg.disableClosingConfirmation(); } catch (e) {}
+  }
+}
+async function retryOne(idx, btn) {
+  const it = lastResult.items[idx];
+  if (!it || !it.text) return;
+  setBusy(btn, true, 'جارٍ الحل…');
+  usage = lastResult.usage || newUsage();
+  try {
+    lastResult.items[idx] = await solveOne({ label: it.label, text: it.text }, undefined);
+  } catch (e) { toast(friendly(e), 'error'); }
+  updateHistory();
+  renderResult();
+}
 
-                updateStatus(`وجدت ${exercises.length} تمرين، جارٍ اختيار الدروس والحل...`, 60);
+/* ===================== الأحداث ===================== */
+function bindUI() {
+  $('#btn-cam').onclick = () => $('#in-cam').click();
+  $('#btn-gal').onclick = () => $('#in-gal').click();
+  $('#in-cam').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+  $('#in-gal').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+  $('#thumbs').onclick = e => {
+    const b = e.target.closest('[data-rm]'); if (!b) return;
+    const id = +b.dataset.rm;
+    const im = images.find(x => x.id === id);
+    if (im) URL.revokeObjectURL(im.url);
+    images = images.filter(x => x.id !== id);
+    renderThumbs(); hap('tap');
+  };
+  $('#btn-solve').onclick = () => { hap('tap'); run(); };
+  $('#btn-cancel').onclick = () => { if (abortCtl) abortCtl.abort(); };
 
-                let solvedResults = [];
-                for (let i = 0; i < exercises.length; i++) {
-                    const ex = exercises[i];
-                    
-                    const catalog = LESSONS.map(l => `[${l.id}] ${l.title}\n${l.raw}`).join('\n\n');
-                    
-                    const selectResp = await ai.models.generateContent({
-                        model: modelName,
-                        contents: [`قائمة الدروس:\n${catalog}\n\nالتمرين:\n${ex.text}`],
-                        config: { systemInstruction: SELECT_SYSTEM, responseMimeType: "application/json" }
-                    });
+  $('#res-list').onclick = async e => {
+    const c = e.target.closest('[data-copy]');
+    if (c) {
+      const it = lastResult.items[+c.dataset.copy];
+      toast(await copyText(`${it.label}\n${it.solution}`) ? 'تم النسخ' : 'تعذّر النسخ');
+      hap('tap'); return;
+    }
+    const r = e.target.closest('[data-retry]');
+    if (r) retryOne(+r.dataset.retry, r);
+  };
+  $('#btn-copy-all').onclick = async () => {
+    if (!lastResult) return;
+    const text = lastResult.items.filter(i => i.status !== 'error')
+      .map(i => `${i.label}\n${i.solution}`).join('\n\n— — —\n\n');
+    toast(await copyText(text) ? 'تم نسخ كل الحلول' : 'تعذّر النسخ');
+  };
+  $('#btn-new').onclick = () => { clearImages(); show('home'); };
 
-                    if (selectResp.usageMetadata) {
-                        totalIn += selectResp.usageMetadata.promptTokenCount || 0;
-                        totalOut += (selectResp.usageMetadata.candidatesTokenCount || 0) + (selectResp.usageMetadata.thoughtsTokenCount || 0);
-                        totalCalls++;
-                    }
+  $('#btn-history').onclick = () => { if (working) return; renderHistory(); show('history'); };
+  $('#hist-list').onclick = e => {
+    const b = e.target.closest('[data-h]'); if (!b) return;
+    const h = loadHistory().find(x => x.id === +b.dataset.h);
+    if (!h) return;
+    lastResult = { items: h.items.map(i => ({ ...i, text: '' })), usage: null, hid: h.id };
+    renderResult(); show('result');
+  };
 
-                    let chosenLessonsText = "";
-                    try {
-                        const selData = JSON.parse(selectResp.text.trim());
-                        const normId = x => String(x).trim().replace(/^0+/, '') || '0';
-                        const wantedIds = new Set((selData.lessons || []).map(normId));
-                        
-                        const matchedLessons = LESSONS.filter(l => wantedIds.has(normId(l.id)));
-                        
-                        if (matchedLessons.length > 0) {
-                            chosenLessonsText = matchedLessons.map(l => `########## الدرس ${l.id}: ${l.title} ##########\n${l.raw}`).join('\n\n');
-                        }
-                    } catch(e) {}
+  $('#btn-settings').onclick = () => { renderSettings(); openSheet('settings'); };
+  document.querySelectorAll('[data-close]').forEach(el => el.onclick = closeSheets);
+  $('#banner-key-btn').onclick = () => { $('#key-error').textContent = ''; openSheet('key'); };
+  $('#set-key-change').onclick = () => { closeSheets(); $('#key-error').textContent = ''; $('#key-input').value = ''; openSheet('key'); };
+  $('#set-key-remove').onclick = () => {
+    store.del('gemini_api_key'); renderSettings(); refreshHome(); toast('أُزيل مفتاح التفعيل من هذا الجهاز');
+  };
+  $('#set-history-clear').onclick = () => { store.del('bacai_history'); renderSettings(); toast('تم مسح السجل'); };
+  $('#set-lessons-update').onclick = async e => {
+    const b = e.currentTarget; setBusy(b, true, '…');
+    try { await syncLessons(true); toast('الدروس محدّثة'); } catch (err) { toast('تعذّر تحديث الدروس. تحقق من الاتصال.', 'error'); }
+    setBusy(b, false); renderSettings(); refreshHome();
+  };
+  $('#banner-lessons-btn').onclick = async e => {
+    const b = e.currentTarget; setBusy(b, true, '…');
+    try { await syncLessons(true); toast('تم تحميل الدروس'); } catch (err) { toast('تعذّر تحميل الدروس. تحقق من الاتصال.', 'error'); }
+    setBusy(b, false); refreshHome();
+  };
 
-                    const solveResp = await ai.models.generateContent({
-                        model: modelName,
-                        contents: [`الدروس:\n${chosenLessonsText}\n\nالتمرين (${ex.label || 'التمرين'}):\n${ex.text}`],
-                        config: { systemInstruction: SOLVE_SYSTEM }
-                    });
+  $('#key-open').onclick = () => openLink(KEY_PAGE);
+  $('#key-paste').onclick = async () => {
+    try {
+      const t = await navigator.clipboard.readText();
+      if (t) $('#key-input').value = t.trim(); else toast('الحافظة فارغة');
+    } catch (e) { toast('الصق المفتاح يدويًا في الخانة'); }
+  };
+  $('#key-save').onclick = async e => {
+    const btn = e.currentTarget, err = $('#key-error');
+    const k = $('#key-input').value.trim();
+    err.textContent = '';
+    if (k.length < 20) { err.textContent = 'المفتاح قصير. تأكد من نسخه كاملاً.'; return; }
+    setBusy(btn, true, 'جارٍ التحقق…');
+    try {
+      await validateKey(k);
+      store.set('gemini_api_key', k);
+      $('#key-input').value = '';
+      closeSheets(); refreshHome(); hap('success'); toast('تم تفعيل التطبيق');
+    } catch (ex) { err.textContent = friendly(ex); hap('error'); }
+    setBusy(btn, false);
+  };
 
-                    if (solveResp.usageMetadata) {
-                        totalIn += solveResp.usageMetadata.promptTokenCount || 0;
-                        totalOut += (solveResp.usageMetadata.candidatesTokenCount || 0) + (solveResp.usageMetadata.thoughtsTokenCount || 0);
-                        totalCalls++;
-                    }
+  let taps = 0, tapTimer;
+  $('#ver').onclick = () => {
+    taps++; clearTimeout(tapTimer); tapTimer = setTimeout(() => { taps = 0; }, 1500);
+    if (taps >= 7) { store.set('bacai_dev', DEV ? '0' : '1'); toast(DEV ? 'عُطّل وضع المطوّر. أعد فتح التطبيق.' : 'فُعّل وضع المطوّر. أعد فتح التطبيق.'); taps = 0; }
+  };
+  $('#ver').textContent = `BacAI · الإصدار ${APP_VERSION}`;
 
-                    solvedResults.push({
-                        label: ex.label || `التمرين ${i+1}`,
-                        solution: solveResp.text.trim()
-                    });
-                }
+  try {
+    if (tg && tg.BackButton) tg.BackButton.onClick(() => {
+      if (sheetOpen()) closeSheets();
+      else if (!working) show('home');
+    });
+  } catch (e) {}
+}
 
-                updateStatus('اكتمل الحل بنجاح!', 100);
-                setTimeout(() => statusCard.classList.add('hidden'), 500);
-                renderSolutions(solvedResults, { in: totalIn, out: totalOut, calls: totalCalls });
+/* ===================== الإقلاع ===================== */
+async function boot() {
+  injectIcons();
+  applyTheme();
+  if (tg) {
+    try { tg.ready(); tg.expand(); } catch (e) {}
+    try { tg.disableVerticalSwipes(); } catch (e) {}
+    try { tg.onEvent('themeChanged', applyTheme); } catch (e) {}
+  }
+  if (!inTelegram && !DEV) {
+    $('#splash').classList.add('hidden');
+    $('#blocked').classList.remove('hidden');
+    if (BOT_LINK) { const a = $('#open-bot'); a.href = BOT_LINK; a.classList.remove('hidden'); }
+    return;
+  }
+  bindUI();
+  loadCachedLessons();
+  const hadCache = LESSONS.length > 0;
+  if (!hadCache) {
+    $('#splash-text').textContent = 'جارٍ تحميل الدروس…';
+    try { await syncLessons(false); } catch (e) {}
+  }
+  $('#splash').classList.add('hidden');
+  $('#app').classList.remove('hidden');
+  show('home'); renderThumbs(); refreshHome();
+  if (!getKey()) openSheet('key');
+  if (hadCache) {
+    syncLessons(false).then(updated => { if (updated) toast('تم تحديث الدروس'); refreshHome(); }).catch(() => {});
+  }
+}
+boot();
 
-            } catch (err) {
-                console.error(err);
-                alert("حدث خطأ أثناء المعالجة: " + err.message);
-                statusCard.classList.add('hidden');
-            } finally {
-                solveBtn.removeAttribute('disabled');
-            }
-        };
-
-        function updateStatus(text, percent) {
-            statusTitle.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>${text}`;
-            statusPercent.innerText = `${percent}%`;
-            progressBar.style.width = `${percent}%`;
-        }
-
-        function renderSolutions(results, stats) {
-            resultsContainer.classList.remove('hidden');
-            solutionsList.innerHTML = results.map((res) => `
-                <div class="glass border border-slate-800 rounded-2xl p-4 flex flex-col gap-3 shadow-lg">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                        <span class="font-bold text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">${res.label}</span>
-                        <button onclick="navigator.clipboard.writeText(\`${res.solution.replace(/`/g, '\\`')}\`)" class="text-[11px] text-slate-400 hover:text-white bg-slate-800/80 px-2.5 py-1 rounded-lg transition border border-slate-700/50 flex items-center gap-1">
-                            📋 نسخ الحل
-                        </button>
-                    </div>
-                    <div class="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap font-sans bg-slate-900/60 p-3.5 rounded-xl border border-slate-800/80">${res.solution}</div>
-                </div>
-            `).join('');
-
-            usageStats.innerHTML = `
-                <div class="font-bold text-slate-300 mb-1">📊 إحصائيات التوكنات والاستدعاءات</div>
-                <div>إدخال: ${stats.in.toLocaleString()} | إخراج: ${stats.out.toLocaleString()}</div>
-                <div>المجموع: ${(stats.in + stats.out).toLocaleString()} توكن (${stats.calls} استدعاء)</div>
-            `;
-        }
-    </script>
+})();
+</script>
 </body>
 </html>
-   
