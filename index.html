@@ -3,187 +3,500 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="theme-color" content="#0b1220">
+<meta name="theme-color" content="#080d16">
+<meta name="color-scheme" content="dark light">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://telegram.org https://cdnjs.cloudflare.com; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data: blob:; connect-src https://generativelanguage.googleapis.com https://cdn.jsdelivr.net https://fastly.jsdelivr.net https://gcore.jsdelivr.net; base-uri 'none'; form-action 'none'; object-src 'none'">
-<title>BacAI</title>
+<title>BacAI — حلول العلوم الإسلامية</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%2310b981'/%3E%3Cg fill='none' stroke='%2304211a' stroke-width='2.6'%3E%3Crect x='12' y='12' width='24' height='24' rx='2.5'/%3E%3Cpath d='M24 6.5 41.5 24 24 41.5 6.5 24Z' stroke-linejoin='round'/%3E%3C/g%3E%3Cpath d='M24 19.6 28.4 24 24 28.4 19.6 24Z' fill='%2304211a'/%3E%3C/svg%3E">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+/* ============ الهوية ============ */
 :root{
-  --bg:#0b1220; --surface:#111a2e; --card:#16213a; --line:#223052;
-  --text:#e8eefc; --muted:#8fa0c2; --accent:#10b981; --accent2:#14b8a6;
-  --accent-ink:#04261c; --danger:#f43f5e; --warn:#f59e0b;
-  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --bg:#080d16; --bg-2:#0b1220; --bg-rgb:8,13,22;
+  --surface:#0d1524; --card:#111b2e; --card-2:#16223a;
+  --line:#1f2c46; --line-2:#2b3a58;
+  --text:#e9eefb; --muted:#93a3c2; --faint:#65758f;
+  --accent:#10b981; --accent-2:#14b8a6; --accent-ink:#04211a;
+  --accent-soft:rgba(16,185,129,.12); --accent-line:rgba(16,185,129,.30);
+  --danger:#f43f5e; --danger-ink:#ff9aab;
+  --danger-soft:rgba(244,63,94,.12); --danger-line:rgba(244,63,94,.30);
+  --warn:#f59e0b; --warn-soft:rgba(245,158,11,.12); --warn-line:rgba(245,158,11,.30);
+  --gold:#e8b775;
+  --r-1:12px; --r-2:16px; --r-3:20px; --r-4:26px; --r-5:32px;
+  --shadow-1:0 2px 6px rgba(0,0,0,.30);
+  --shadow-2:0 14px 34px rgba(0,0,0,.42);
+  --shadow-glow:0 10px 26px rgba(16,185,129,.22);
+  --ease:cubic-bezier(.22,.61,.36,1);
 }
 [data-theme="light"]{
-  --bg:#f4f7fb; --surface:#ffffff; --card:#ffffff; --line:#e2e8f0;
-  --text:#0f172a; --muted:#64748b; --accent:#059669; --accent2:#0d9488;
-  --accent-ink:#ffffff; --shadow:0 10px 30px rgba(15,23,42,.08);
+  --bg:#f6f8fc; --bg-2:#ffffff; --bg-rgb:246,248,252;
+  --surface:#ffffff; --card:#ffffff; --card-2:#f3f7fb;
+  --line:#e3e9f2; --line-2:#cfd9e8;
+  --text:#0c1526; --muted:#5a6a84; --faint:#8595ac;
+  --accent:#059669; --accent-2:#0d9488; --accent-ink:#ffffff;
+  --accent-soft:rgba(5,150,105,.10); --accent-line:rgba(5,150,105,.28);
+  --danger-ink:#be123c;
+  --danger-soft:rgba(244,63,94,.08); --danger-line:rgba(244,63,94,.25);
+  --warn-soft:rgba(245,158,11,.10); --warn-line:rgba(245,158,11,.30);
+  --gold:#a9762a;
+  --shadow-1:0 1px 3px rgba(15,23,42,.06);
+  --shadow-2:0 12px 30px rgba(15,23,42,.09);
+  --shadow-glow:0 10px 24px rgba(5,150,105,.20);
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--text);
+
+/* ============ الأساس ============ */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
   font-family:'Cairo',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
-  font-size:15px;line-height:1.7}
-body{min-height:100vh;min-height:100dvh}
-.hidden{display:none!important}
-button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
+  font-size:15px; line-height:1.7;
+  min-height:100vh; min-height:100dvh; overflow-x:hidden;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  -webkit-tap-highlight-color:transparent;
+}
+body::before{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(95% 55% at 100% 0%, rgba(16,185,129,.11), transparent 62%),
+    radial-gradient(85% 50% at 0% 8%, rgba(20,184,166,.09), transparent 58%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 42%);
+}
+[data-theme="light"] body::before{
+  background:
+    radial-gradient(95% 55% at 100% 0%, rgba(5,150,105,.10), transparent 62%),
+    radial-gradient(85% 50% at 0% 8%, rgba(13,148,136,.08), transparent 58%),
+    linear-gradient(180deg, #ffffff, var(--bg) 46%);
+}
 h1,h2,h3,p{margin:0}
-svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0;text-align:inherit}
+a{color:var(--accent);text-decoration:none}
+::selection{background:var(--accent);color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:10px}
+.hidden{display:none!important}
 .muted{color:var(--muted)} .small{font-size:12.5px} .center{text-align:center}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
-/* الشاشات الكاملة */
-.splash,.blocked{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
-.logo-lg{width:76px;height:76px;border-radius:24px;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink);box-shadow:var(--shadow)}
-.logo-lg svg.i{width:38px;height:38px}
-.brand{font-weight:800;font-size:26px;letter-spacing:.5px}
-.spinner{width:26px;height:26px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* ============ العلامة ============ */
+.mark{
+  display:grid; place-items:center; flex:none; color:var(--accent-ink);
+  background:linear-gradient(140deg,var(--accent),var(--accent-2));
+  box-shadow:var(--shadow-glow), inset 0 1px 0 rgba(255,255,255,.22);
+}
+.mark svg{width:64%; height:64%; overflow:visible}
+.mark.sm{width:38px;height:38px;border-radius:12px}
+.mark.md{width:44px;height:44px;border-radius:14px}
+.mark.lg{width:88px;height:88px;border-radius:28px;box-shadow:0 18px 44px rgba(16,185,129,.30), inset 0 1px 0 rgba(255,255,255,.22)}
+[data-theme="light"] .mark.lg{box-shadow:0 18px 40px rgba(5,150,105,.24), inset 0 1px 0 rgba(255,255,255,.35)}
 
-/* الهيكل */
-.app{max-width:520px;margin:0 auto;padding:0 16px calc(28px + env(safe-area-inset-bottom))}
-.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
-  padding:calc(12px + env(safe-area-inset-top)) 0 12px;background:var(--bg)}
-.brand-row{display:flex;align-items:center;gap:11px}
-.logo{width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink)}
-.brand-row h1{font-size:17px;font-weight:800;line-height:1.2}
-.brand-row p{font-size:11.5px;color:var(--muted)}
+/* ============ الشاشات الكاملة ============ */
+.splash,.blocked{
+  position:fixed; inset:0; z-index:100; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:14px; padding:28px; text-align:center;
+  background:
+    radial-gradient(70% 45% at 50% 22%, rgba(16,185,129,.16), transparent 70%),
+    linear-gradient(180deg, var(--bg-2), var(--bg));
+}
+.splash .mark.lg{animation:floaty 3.2s var(--ease) infinite}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.brand-lg{font-weight:900;font-size:30px;letter-spacing:.5px;margin-top:4px}
+.brand-lg span{color:var(--accent)}
+.splash-tag{font-size:13px;color:var(--muted);margin-top:-6px}
+.splash-bar{width:132px;height:3px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px}
+.splash-bar i{display:block;width:42%;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent-2));animation:slide 1.35s var(--ease) infinite}
+@keyframes slide{0%{transform:translateX(-130%)}100%{transform:translateX(330%)}}
+.blocked p{max-width:300px;font-size:14px;line-height:1.9}
+
+/* ============ الهيكل ============ */
+.app{max-width:560px;margin:0 auto;padding:0 16px calc(30px + env(safe-area-inset-bottom))}
+.top{
+  position:sticky; top:0; z-index:30; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  margin:0 -16px; padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+  background:rgba(var(--bg-rgb),.86);
+  -webkit-backdrop-filter:blur(16px) saturate(1.25); backdrop-filter:blur(16px) saturate(1.25);
+}
+.brand-row{display:flex;align-items:center;gap:11px;min-width:0}
+.brand-txt{min-width:0}
+.brand-txt h1{font-size:17.5px;font-weight:900;line-height:1.15;letter-spacing:.2px}
+.brand-txt h1 span{color:var(--accent)}
+.brand-txt p{font-size:11px;color:var(--faint);margin-top:2px}
 .top-actions{display:flex;gap:8px}
-.icon-btn{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);
-  display:inline-flex;align-items:center;justify-content:center;color:var(--muted)}
-.icon-btn:active{transform:scale(.95)}
-.icon-btn.sm{width:34px;height:34px;border-radius:10px}
-.view{display:flex;flex-direction:column;gap:16px;animation:fade .25s ease}
-@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.icon-btn{
+  width:40px;height:40px;border-radius:13px;display:inline-flex;align-items:center;justify-content:center;
+  color:var(--muted);background:var(--card);border:1px solid var(--line);
+  transition:transform .12s var(--ease), color .2s, border-color .2s, background .2s;
+}
+.icon-btn:hover{color:var(--text);border-color:var(--line-2)}
+.icon-btn:active{transform:scale(.93)}
+.icon-btn.sm{width:34px;height:34px;border-radius:11px}
+.icon-btn.sm svg.i{width:16px;height:16px}
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow)}
-.hero h2{font-size:21px;font-weight:800;line-height:1.4}
-.hero p{margin-top:6px;color:var(--muted);font-size:13.5px}
+.view{display:flex;flex-direction:column;gap:14px;animation:enter .3s var(--ease)}
+@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-.banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-radius:16px;
-  background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3)}
-.banner div{display:flex;flex-direction:column;font-size:12.5px;color:var(--muted)}
-.banner strong{color:var(--text);font-size:14px}
-.banner.warn{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.35)}
+/* ============ البطاقات ============ */
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--r-3);
+  padding:16px; box-shadow:var(--shadow-1);
+}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 18px;border-radius:14px;
-  font-weight:700;font-size:14.5px;transition:transform .08s,opacity .2s}
-.btn:active{transform:scale(.98)} .btn:disabled{opacity:.45;cursor:not-allowed}
-.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--accent-ink);box-shadow:0 8px 20px rgba(16,185,129,.22)}
-.btn.secondary{background:var(--card);border:1px solid var(--line)}
-.btn.ghost{color:var(--muted)}
-.btn.danger{color:var(--danger);background:var(--card);border:1px solid var(--line)}
-.btn.block{width:100%} .btn.sm{padding:8px 14px;font-size:13px;border-radius:12px}
+/* ============ الواجهة الرئيسية ============ */
+.hero{
+  position:relative; isolation:isolate; overflow:hidden;
+  border:1px solid var(--line); border-radius:var(--r-4);
+  padding:22px 20px 20px; box-shadow:var(--shadow-2);
+  background:linear-gradient(155deg,var(--card-2),var(--card) 58%,var(--surface));
+}
+.hero::before{
+  content:''; position:absolute; inset:0; z-index:-1; opacity:.55;
+  background-image:
+    repeating-linear-gradient(45deg, var(--line) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(-45deg, var(--line) 0 1px, transparent 1px 26px);
+  -webkit-mask-image:radial-gradient(130% 95% at 88% -10%, #000 0%, transparent 72%);
+  mask-image:radial-gradient(130% 95% at 88% -10%, #000 0%, transparent 72%);
+}
+.hero::after{
+  content:''; position:absolute; z-index:-1; inset-block-start:-45%; inset-inline-end:-18%;
+  width:72%; height:130%; pointer-events:none;
+  background:radial-gradient(circle, rgba(16,185,129,.22), transparent 66%);
+}
+[data-theme="light"] .hero::after{background:radial-gradient(circle, rgba(5,150,105,.13), transparent 66%)}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:99px;
+  font-size:11.5px;font-weight:700;letter-spacing:.2px;
+  color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-line);
+}
+.pill::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.hero h2{font-size:23px;font-weight:900;line-height:1.42;letter-spacing:-.2px;margin-top:14px}
+.hero h2 em{font-style:normal;color:var(--accent)}
+.hero > p{margin-top:8px;color:var(--muted);font-size:13.5px;line-height:1.8}
+.hero-feats{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:7px}
+.hero-feats li{
+  display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);font-weight:600;
+  background:var(--card-2);border:1px solid var(--line);border-radius:99px;padding:4px 10px;
+}
+.hero-feats svg.i{width:13px;height:13px;color:var(--accent);stroke-width:2.6}
 
+/* ============ الأشرطة ============ */
+.banner{
+  display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px;
+  padding:13px 14px; border-radius:var(--r-2);
+  background:var(--accent-soft); border:1px solid var(--accent-line);
+}
+.banner.warn{background:var(--warn-soft);border-color:var(--warn-line)}
+.banner .b-ico{
+  width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:rgba(255,255,255,.06);color:var(--accent);border:1px solid var(--accent-line);
+}
+.banner.warn .b-ico{color:var(--warn);border-color:var(--warn-line);background:rgba(255,255,255,.04)}
+.banner .b-ico svg.i{width:17px;height:17px}
+.banner .b-txt{display:flex;flex-direction:column;gap:1px;min-width:0}
+.banner .b-txt strong{font-size:13.5px;font-weight:800;color:var(--text)}
+.banner .b-txt span{font-size:11.5px;color:var(--muted);line-height:1.5}
+
+/* ============ الأزرار ============ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 18px;border-radius:14px;font-weight:800;font-size:14.5px;line-height:1.2;white-space:nowrap;
+  transition:transform .12s var(--ease), box-shadow .22s, background .22s, opacity .22s, border-color .22s;
+}
+.btn:active{transform:scale(.975)}
+.btn:disabled{opacity:.42;cursor:not-allowed;box-shadow:none}
+.btn svg.i{width:18px;height:18px}
+.btn.primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--accent-ink);
+  box-shadow:var(--shadow-glow), inset 0 1px 0 rgba(255,255,255,.18);
+}
+.btn.primary:not(:disabled):hover{box-shadow:0 14px 32px rgba(16,185,129,.32)}
+.btn.secondary{background:var(--card-2);border:1px solid var(--line);color:var(--text)}
+.btn.secondary:hover{border-color:var(--line-2)}
+.btn.ghost{background:transparent;color:var(--muted);font-weight:700}
+.btn.ghost:hover{color:var(--text)}
+.btn.danger{background:var(--danger-soft);border:1px solid var(--danger-line);color:var(--danger-ink)}
+.btn.block{width:100%}
+.btn.sm{padding:8px 13px;font-size:12.5px;border-radius:11px;gap:6px}
+.btn.sm svg.i{width:15px;height:15px}
+
+/* ============ اختيار الصور ============ */
 .pick{display:flex;flex-direction:column;gap:14px}
-.pick-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.pick-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 10px;border-radius:16px;
-  border:1.5px dashed var(--line);background:var(--surface);color:var(--accent);font-weight:700}
-.pick-btn b{color:var(--text);font-size:13.5px}
-.pick-btn svg.i{width:26px;height:26px}
+.pick-btns{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.pick-btn{
+  display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 10px 18px;
+  border-radius:var(--r-3);border:1.5px dashed var(--line-2);
+  background:linear-gradient(180deg,var(--card-2),var(--surface));
+  transition:border-color .2s, transform .12s var(--ease), background .2s;
+}
+.pick-btn:active{transform:scale(.98);border-color:var(--accent-line)}
+.pick-btn .ico{
+  width:50px;height:50px;border-radius:17px;display:grid;place-items:center;
+  background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent);
+}
+.pick-btn .ico svg.i{width:24px;height:24px;stroke-width:1.9}
+.pick-btn b{font-size:13px;font-weight:700;color:var(--text)}
 .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.thumb{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+.thumb{
+  position:relative;aspect-ratio:1;border-radius:var(--r-2);overflow:hidden;
+  border:1px solid var(--line);background:var(--surface);animation:enter .25s var(--ease);
+}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.thumb button{position:absolute;top:6px;left:6px;width:24px;height:24px;border-radius:50%;
-  background:rgba(0,0,0,.65);color:#fff;display:flex;align-items:center;justify-content:center}
-.thumb button svg.i{width:14px;height:14px;stroke-width:2.4}
+.thumb button{
+  position:absolute;inset-block-start:6px;inset-inline-start:6px;
+  width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(6,10,18,.72);color:#fff;border:1px solid rgba(255,255,255,.20);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+}
+.thumb button svg.i{width:13px;height:13px;stroke-width:2.6}
+.fineprint{font-size:11.5px;color:var(--faint);text-align:center;line-height:1.8;padding:0 8px}
 
-/* العمل */
-.work h2{font-size:17px;font-weight:800}
+/* ============ جارٍ العمل ============ */
+.work{padding:18px}
 .work-head{display:flex;align-items:center;gap:10px}
-.pulse{width:12px;height:12px;border-radius:50%;background:var(--accent);animation:pulse 1.4s ease infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.5)}100%{box-shadow:0 0 0 12px rgba(16,185,129,0)}}
-.steps{list-style:none;padding:0;margin:16px 0;display:grid;gap:12px}
-.steps li{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px}
-.steps .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex:none}
-.steps li.active{color:var(--text);font-weight:700}
+.work h2{font-size:16.5px;font-weight:800}
+.pulse{
+  width:10px;height:10px;border-radius:50%;background:var(--accent);flex:none;
+  animation:pulse 1.5s ease-out infinite;
+}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.55)}100%{box-shadow:0 0 0 14px rgba(16,185,129,0)}}
+.steps{list-style:none;padding:0;margin:18px 0 16px;display:grid;gap:2px}
+.steps li{
+  position:relative;display:flex;align-items:center;gap:12px;
+  color:var(--faint);font-size:13.5px;font-weight:600;padding:9px 0;
+}
+.steps li:not(:last-child)::after{
+  content:'';position:absolute;inset-inline-start:10px;inset-block-start:35px;
+  width:1.5px;height:16px;background:var(--line);
+}
+.steps .dot{
+  width:22px;height:22px;border-radius:50%;border:2px solid var(--line-2);flex:none;
+  display:grid;place-items:center;background:var(--surface);transition:.25s var(--ease);
+}
+.steps li.active{color:var(--text);font-weight:800}
 .steps li.active .dot{border-color:var(--accent);border-top-color:transparent;animation:spin 1s linear infinite}
 .steps li.done{color:var(--text)}
 .steps li.done .dot{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.steps li.done .dot svg.i{width:13px;height:13px;stroke-width:3}
+.steps li.done .dot svg.i{width:12px;height:12px;stroke-width:3.2}
+@keyframes spin{to{transform:rotate(360deg)}}
 .bar{height:8px;background:var(--surface);border:1px solid var(--line);border-radius:99px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s ease}
-.work .sub{margin:10px 0 14px;font-size:12.5px;color:var(--muted)}
+.bar i{
+  display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  box-shadow:0 0 12px rgba(16,185,129,.55);
+  transition:width .55s var(--ease);
+}
+.work .sub{margin:12px 0 16px;font-size:12px;color:var(--faint);line-height:1.7}
 
-/* النتائج */
-.res-head h2{font-size:19px;font-weight:800}
+/* ============ النتيجة ============ */
+.res-head{padding:2px 2px 0}
+.res-head h2{font-size:19px;font-weight:900;letter-spacing:-.2px}
 .res-head p{color:var(--muted);font-size:12.5px;margin-top:2px}
-.sol-card{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
-.sol-head{display:flex;align-items:center;justify-content:space-between}
-.chip{font-weight:700;font-size:12.5px;color:var(--accent);background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);
-  padding:3px 12px;border-radius:99px}
-.sol{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;font-size:14px;line-height:1.95}
-.ln{padding:1px 0}
-.ln.b::before{content:'•';color:var(--accent);margin-inline-end:8px;font-weight:800}
-.l1{padding-inline-start:18px}.l2{padding-inline-start:36px}.l3{padding-inline-start:54px}
-.sp{height:8px}
-.badge{font-size:12.5px;padding:9px 12px;border-radius:12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);color:var(--text)}
-.err-box{font-size:13.5px;padding:12px;border-radius:12px;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.35)}
-.note{font-size:12px;color:var(--muted);text-align:center;margin:2px 0 4px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.dev{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--muted);white-space:pre-wrap;direction:ltr;text-align:left}
+#res-list{display:flex;flex-direction:column;gap:12px;counter-reset:card}
+.sol-card{
+  counter-increment:card; padding:0; overflow:hidden; border-radius:var(--r-3);
+  animation:enter .3s var(--ease) both;
+}
+.sol-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:11px 14px;background:var(--card-2);border-bottom:1px solid var(--line);
+}
+.chip{
+  display:inline-flex;align-items:center;gap:0;font-weight:800;font-size:12.5px;
+  color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-line);
+  padding:3px 11px;border-radius:99px;
+}
+.chip::before{
+  content:counter(card);display:inline-grid;place-items:center;
+  min-width:19px;height:19px;border-radius:50%;margin-inline-end:7px;
+  background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:900;
+}
+.sol-card:only-child .chip::before{display:none}
+.sol{
+  padding:14px 15px;font-size:14.5px;line-height:2.05;
+  word-break:break-word;overflow-wrap:anywhere;
+}
+.ln{padding:2px 0}
+.ln.b{position:relative;padding-inline-start:19px}
+.ln.b::before{
+  content:'';position:absolute;inset-inline-start:5px;inset-block-start:.92em;
+  width:5px;height:5px;border-radius:50%;background:var(--accent);
+}
+.l1{padding-inline-start:18px}
+.l2{padding-inline-start:36px}
+.l3{padding-inline-start:54px}
+.sp{height:9px}
+.badge{
+  margin:12px 15px 0;font-size:12.5px;line-height:1.7;padding:10px 12px;border-radius:12px;
+  background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--text);
+}
+.err-box{
+  margin:14px 15px;font-size:13.5px;line-height:1.7;padding:12px;border-radius:12px;
+  background:var(--danger-soft);border:1px solid var(--danger-line);color:var(--danger-ink);
+}
+.sol-card > .btn{margin:0 15px 15px}
+.note{font-size:11.5px;color:var(--faint);text-align:center;margin:2px 0;line-height:1.8}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.dev{
+  font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--faint);
+  white-space:pre-wrap;direction:ltr;text-align:left;line-height:1.6;
+  background:var(--surface);border-style:dashed;
+}
 
-/* السجل */
-.h-item{display:flex;flex-direction:column;gap:4px;text-align:start;width:100%;margin-bottom:10px}
-.h-item b{font-size:14px}
-.h-item span{font-size:12px;color:var(--muted)}
-.empty{padding:36px 10px;text-align:center;color:var(--muted)}
+/* ============ السجل ============ */
+.h-item{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;
+  width:100%;text-align:start;padding:14px 15px;
+  transition:border-color .2s, transform .12s var(--ease);
+}
+.h-item:active{transform:scale(.99)}
+.h-item:hover{border-color:var(--line-2)}
+.h-item b{grid-column:1;grid-row:1;font-size:14px;font-weight:800}
+.h-item span{grid-column:1;font-size:11.5px;color:var(--muted);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h-item span:last-child{color:var(--faint)}
+.h-item::after{
+  content:'';grid-column:2;grid-row:1/-1;align-self:center;
+  width:8px;height:8px;border-inline-start:2px solid var(--faint);border-block-end:2px solid var(--faint);
+  transform:rotate(45deg);border-end-start-radius:1px;
+}
+.empty{padding:44px 16px;text-align:center;color:var(--faint);font-size:13px}
+.empty::before{
+  content:'';display:block;width:58px;height:58px;margin:0 auto 14px;border-radius:19px;
+  border:1.5px dashed var(--line-2);background:var(--card);
+}
 
-/* النوافذ السفلية */
+/* ============ النوافذ السفلية ============ */
 .sheet-wrap{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center}
-.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.55)}
-.sheet{position:relative;width:100%;max-width:520px;background:var(--surface);border:1px solid var(--line);
-  border-radius:24px 24px 0 0;padding:14px 18px calc(20px + env(safe-area-inset-bottom));max-height:90vh;max-height:90dvh;
-  overflow:auto;animation:up .25s ease;display:flex;flex-direction:column;gap:14px}
-@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
-.grab{width:44px;height:5px;border-radius:99px;background:var(--line);margin:0 auto 2px}
-.sheet h2{font-size:18px;font-weight:800}
-.steps-list{margin:0;padding-inline-start:20px;display:grid;gap:6px;color:var(--muted);font-size:13.5px}
+.sheet-bg{position:absolute;inset:0;background:rgba(3,7,14,.62);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:enter .2s ease}
+.sheet{
+  position:relative;width:100%;max-width:560px;max-height:90vh;max-height:90dvh;overflow:auto;
+  background:var(--surface);border:1px solid var(--line);border-bottom:0;
+  border-radius:var(--r-5) var(--r-5) 0 0;
+  padding:12px 18px calc(22px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;gap:16px;
+  box-shadow:0 -20px 50px rgba(0,0,0,.45);
+  animation:up .3s var(--ease);
+}
+@keyframes up{from{transform:translateY(46px);opacity:0}to{transform:none;opacity:1}}
+.grab{width:44px;height:5px;border-radius:99px;background:var(--line-2);margin:0 auto 2px}
+.sheet-x{
+  position:absolute;inset-block-start:14px;inset-inline-start:16px;
+  width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:var(--card);border:1px solid var(--line);color:var(--muted);
+}
+.sheet-x svg.i{width:16px;height:16px}
+.sheet-head{display:flex;align-items:center;gap:12px;padding-inline-end:44px}
+.sheet-head h2{font-size:18px;font-weight:900}
+.sheet-head p{font-size:12px;color:var(--muted);line-height:1.6;margin-top:2px}
+.sheet > h2{font-size:18px;font-weight:900}
+.steps-list{
+  list-style:none;margin:0;padding:0;display:grid;gap:11px;counter-reset:s;
+}
+.steps-list li{
+  counter-increment:s;position:relative;padding-inline-start:33px;
+  font-size:13px;color:var(--muted);line-height:1.65;
+}
+.steps-list li::before{
+  content:counter(s);position:absolute;inset-inline-start:0;inset-block-start:1px;
+  width:23px;height:23px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent-soft);border:1px solid var(--accent-line);
+  color:var(--accent);font-size:11.5px;font-weight:900;
+}
 .field{display:flex;gap:8px}
-.field input{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;
-  color:var(--text);font:inherit;font-size:14px;direction:ltr;text-align:left}
-.field input:focus{outline:2px solid var(--accent);outline-offset:-1px}
-.err-line{color:var(--danger);font-size:13px;min-height:0}
-.set-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
-.set-row:last-of-type{border-bottom:0}
-.set-row b{font-size:14px;display:block}
-.set-row span.m{font-size:12px;color:var(--muted)}
-.foot{font-size:12px;color:var(--muted);text-align:center;line-height:1.8}
+.field input{
+  flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:13px;
+  padding:13px 14px;color:var(--text);font:inherit;font-size:14px;direction:ltr;text-align:left;
+  transition:border-color .2s, box-shadow .2s;
+}
+.field input::placeholder{color:var(--faint);direction:rtl;text-align:right}
+.field input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.err-line{color:var(--danger-ink);font-size:12.5px;line-height:1.6;min-height:0}
+.set-row{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;
+  padding:13px 0;border-bottom:1px solid var(--line);
+}
+.set-row:last-of-type{border-bottom:0;padding-bottom:4px}
+.set-ico{
+  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none;
+  background:var(--card-2);border:1px solid var(--line);color:var(--accent);
+}
+.set-ico svg.i{width:18px;height:18px}
+.set-txt{min-width:0}
+.set-txt b{display:block;font-size:13.5px;font-weight:800}
+.set-txt .m{display:block;font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.foot{font-size:11.5px;color:var(--faint);text-align:center;line-height:1.9}
+.foot #ver{font-weight:700;color:var(--muted);user-select:none}
 
-.toast{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translate(-50%,24px);opacity:0;
-  max-width:86vw;background:var(--text);color:var(--bg);padding:11px 18px;border-radius:14px;font-size:13.5px;font-weight:600;
-  z-index:200;pointer-events:none;transition:all .25s ease;text-align:center}
+/* ============ التوست ============ */
+.toast{
+  position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));
+  transform:translate(-50%,26px);opacity:0;max-width:86vw;z-index:200;pointer-events:none;
+  background:var(--text);color:var(--bg);padding:11px 18px;border-radius:15px;
+  font-size:13px;font-weight:700;line-height:1.6;text-align:center;
+  box-shadow:0 16px 40px rgba(0,0,0,.45);
+  transition:opacity .25s var(--ease), transform .25s var(--ease);
+}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.error{background:var(--danger);color:#fff}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+@media (max-width:340px){
+  .hero h2{font-size:20px}
+  .pick-btn{padding:16px 8px}
+  .btn{font-size:13.5px;padding:12px 14px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
 </style>
 </head>
 <body>
 
+<!-- ============ الإقلاع ============ -->
 <div id="splash" class="splash">
-  <div class="logo-lg"><span data-i="book"></span></div>
-  <div class="brand">BacAI</div>
-  <div class="spinner"></div>
+  <div class="mark lg">
+    <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <rect x="12" y="12" width="24" height="24" rx="2.5" stroke="currentColor" stroke-width="2.4"/>
+      <path d="M24 6.5 41.5 24 24 41.5 6.5 24Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+      <path d="M24 19.6 28.4 24 24 28.4 19.6 24Z" fill="currentColor"/>
+    </svg>
+  </div>
+  <div class="brand-lg">Bac<span>AI</span></div>
+  <p class="splash-tag">حلول العلوم الإسلامية · البكالوريا</p>
+  <div class="splash-bar"><i></i></div>
   <p id="splash-text" class="muted small">جارٍ التحضير…</p>
 </div>
 
 <div id="blocked" class="blocked hidden">
-  <div class="logo-lg"><span data-i="book"></span></div>
-  <div class="brand">BacAI</div>
+  <div class="mark lg">
+    <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <rect x="12" y="12" width="24" height="24" rx="2.5" stroke="currentColor" stroke-width="2.4"/>
+      <path d="M24 6.5 41.5 24 24 41.5 6.5 24Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+      <path d="M24 19.6 28.4 24 24 28.4 19.6 24Z" fill="currentColor"/>
+    </svg>
+  </div>
+  <div class="brand-lg">Bac<span>AI</span></div>
   <p class="muted">يعمل هذا التطبيق داخل تيليجرام فقط.<br>افتحه من بوت BacAI.</p>
-  <a id="open-bot" class="btn primary hidden" style="text-decoration:none">فتح البوت</a>
+  <a id="open-bot" class="btn primary hidden">فتح البوت</a>
 </div>
 
+<!-- ============ التطبيق ============ -->
 <div id="app" class="app hidden">
   <header class="top">
     <div class="brand-row">
-      <div class="logo"><span data-i="book"></span></div>
-      <div><h1>BacAI</h1><p>حلّ مواضيع العلوم الإسلامية</p></div>
+      <div class="mark md">
+        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <rect x="12" y="12" width="24" height="24" rx="2.5" stroke="currentColor" stroke-width="2.6"/>
+          <path d="M24 6.5 41.5 24 24 41.5 6.5 24Z" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
+          <path d="M24 19.6 28.4 24 24 28.4 19.6 24Z" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="brand-txt">
+        <h1>Bac<span>AI</span></h1>
+        <p>العلوم الإسلامية · بكالوريا</p>
+      </div>
     </div>
     <div class="top-actions">
       <button id="btn-history" class="icon-btn" aria-label="السجل"><span data-i="history"></span></button>
@@ -195,35 +508,60 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
     <!-- الرئيسية -->
     <section id="view-home" class="view">
       <div class="hero">
-        <h2>صوّر الموضوع واحصل على الحل</h2>
-        <p>التقط صورة لموضوع العلوم الإسلامية أو لتمرين واحد، وسنكتب لك الحل النموذجي بأسلوب ورقة الإجابة.</p>
+        <span class="pill">العلوم الإسلامية · البكالوريا</span>
+        <h2>صوّر الموضوع واحصل على <em>الحل النموذجي</em></h2>
+        <p>التقط صورة لموضوع كامل أو لتمرين واحد، ونكتب لك الحل بأسلوب ورقة الإجابة الرسمية.</p>
+        <ul class="hero-feats">
+          <li><span data-i="check"></span> تمارين متعددة</li>
+          <li><span data-i="check"></span> آيات وأحاديث</li>
+          <li><span data-i="check"></span> أسلوب ورقة الإجابة</li>
+        </ul>
       </div>
 
       <div id="banner-key" class="banner hidden">
-        <div><strong>فعّل التطبيق لتبدأ</strong><span>تحتاج مفتاح تفعيل مجاني من Google، ويستغرق دقيقة.</span></div>
+        <span class="b-ico" data-i="key"></span>
+        <div class="b-txt">
+          <strong>فعّل التطبيق لتبدأ</strong>
+          <span>تحتاج مفتاح تفعيل مجاني من Google، ويستغرق دقيقة.</span>
+        </div>
         <button id="banner-key-btn" class="btn primary sm">تفعيل</button>
       </div>
+
       <div id="banner-lessons" class="banner warn hidden">
-        <div><strong>تعذّر تحميل الدروس</strong><span>تحقق من اتصالك بالإنترنت ثم أعد المحاولة.</span></div>
+        <span class="b-ico" data-i="alert"></span>
+        <div class="b-txt">
+          <strong>تعذّر تحميل البيانات</strong>
+          <span>تحقق من اتصالك بالإنترنت ثم أعد المحاولة.</span>
+        </div>
         <button id="banner-lessons-btn" class="btn secondary sm">إعادة المحاولة</button>
       </div>
 
       <div class="card pick">
         <div class="pick-btns">
-          <button id="btn-cam" class="pick-btn"><span data-i="camera"></span><b>التقاط صورة</b></button>
-          <button id="btn-gal" class="pick-btn"><span data-i="image"></span><b>من المعرض</b></button>
+          <button id="btn-cam" class="pick-btn">
+            <span class="ico" data-i="camera"></span>
+            <b>التقاط صورة</b>
+          </button>
+          <button id="btn-gal" class="pick-btn">
+            <span class="ico" data-i="image"></span>
+            <b>من المعرض</b>
+          </button>
         </div>
         <div id="thumbs" class="thumbs hidden"></div>
         <p id="pick-hint" class="muted small center">أضف صورة واضحة ومضاءة تُظهر كامل الأسئلة. يمكنك إضافة عدة صور.</p>
         <button id="btn-solve" class="btn primary block" disabled><span data-i="spark"></span>حلّ الموضوع</button>
       </div>
-      <p class="muted small center">تُرسل الصور مباشرة من جهازك إلى Google لمعالجتها، ولا تُحفظ في أي خادم تابع للتطبيق.</p>
+
+      <p class="fineprint">تُرسل الصور مباشرة من جهازك إلى Google لمعالجتها، ولا تُحفظ في أي خادم تابع للتطبيق.</p>
     </section>
 
     <!-- جارٍ العمل -->
     <section id="view-working" class="view hidden">
       <div class="card work">
-        <div class="work-head"><div class="pulse"></div><h2 id="work-title">جارٍ العمل…</h2></div>
+        <div class="work-head">
+          <div class="pulse"></div>
+          <h2 id="work-title">جارٍ العمل…</h2>
+        </div>
         <ol class="steps">
           <li id="st-read"><span class="dot"></span><span>قراءة الموضوع</span></li>
           <li id="st-solve"><span class="dot"></span><span id="st-solve-text">إعداد الحلول</span></li>
@@ -236,7 +574,10 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 
     <!-- النتيجة -->
     <section id="view-result" class="view hidden">
-      <div class="res-head"><h2 id="res-title"></h2><p id="res-sub"></p></div>
+      <div class="res-head">
+        <h2 id="res-title"></h2>
+        <p id="res-sub"></p>
+      </div>
       <div id="res-list"></div>
       <p class="note">الحلول مقترحة بالذكاء الاصطناعي، فراجعها مع كتابك المدرسي ومعلّمك.</p>
       <div id="res-dev" class="card dev hidden"></div>
@@ -248,25 +589,34 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 
     <!-- السجل -->
     <section id="view-history" class="view hidden">
-      <div class="res-head"><h2>السجل</h2><p>آخر المواضيع التي حللتها على هذا الجهاز</p></div>
-      <div id="hist-list"></div>
+      <div class="res-head">
+        <h2>السجل</h2>
+        <p>آخر المواضيع التي حللتها على هذا الجهاز</p>
+      </div>
+      <div id="hist-list" style="display:flex;flex-direction:column;gap:10px"></div>
     </section>
   </main>
 </div>
 
-<!-- نافذة التفعيل -->
-<div id="sheet-key" class="sheet-wrap hidden" role="dialog" aria-modal="true">
+<!-- ============ نافذة التفعيل ============ -->
+<div id="sheet-key" class="sheet-wrap hidden" role="dialog" aria-modal="true" aria-label="تفعيل BacAI">
   <div class="sheet-bg" data-close></div>
   <div class="sheet">
     <div class="grab"></div>
-    <h2>تفعيل BacAI</h2>
-    <p class="muted" style="font-size:13.5px">يعمل BacAI بمفتاح تفعيل مجاني من Google. يُحفظ المفتاح على جهازك فقط.</p>
+    <button class="sheet-x" data-close data-i="close" aria-label="إغلاق"></button>
+    <div class="sheet-head">
+      <span class="set-ico" data-i="key"></span>
+      <div>
+        <h2>تفعيل BacAI</h2>
+        <p>يعمل التطبيق بمفتاح تفعيل مجاني من Google، ويُحفظ على جهازك فقط.</p>
+      </div>
+    </div>
     <ol class="steps-list">
       <li>اضغط «فتح صفحة المفتاح» وسجّل الدخول بحساب Google.</li>
       <li>أنشئ مفتاحاً جديداً ثم انسخه.</li>
       <li>ارجع إلى هنا والصقه في الخانة أدناه.</li>
     </ol>
-    <button id="key-open" class="btn secondary block">فتح صفحة المفتاح</button>
+    <button id="key-open" class="btn secondary block"><span data-i="link"></span>فتح صفحة المفتاح</button>
     <div class="field">
       <input id="key-input" type="password" placeholder="الصق المفتاح هنا" autocomplete="off" spellcheck="false">
       <button id="key-paste" class="btn secondary sm">لصق</button>
@@ -276,27 +626,34 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
   </div>
 </div>
 
-<!-- نافذة الإعدادات -->
-<div id="sheet-settings" class="sheet-wrap hidden" role="dialog" aria-modal="true">
+<!-- ============ نافذة الإعدادات ============ -->
+<div id="sheet-settings" class="sheet-wrap hidden" role="dialog" aria-modal="true" aria-label="الإعدادات">
   <div class="sheet-bg" data-close></div>
   <div class="sheet">
     <div class="grab"></div>
-    <h2>الإعدادات</h2>
+    <button class="sheet-x" data-close data-i="close" aria-label="إغلاق"></button>
+    <div class="sheet-head">
+      <span class="set-ico" data-i="settings"></span>
+      <div><h2>الإعدادات</h2></div>
+    </div>
     <div>
       <div class="set-row">
-        <div><b>التفعيل</b><span class="m" id="set-key">—</span></div>
+        <span class="set-ico" data-i="key"></span>
+        <div class="set-txt"><b>التفعيل</b><span class="m" id="set-key">—</span></div>
         <button id="set-key-change" class="btn secondary sm">تغيير</button>
       </div>
       <div class="set-row">
-        <div><b>الدروس</b><span class="m" id="set-lessons">—</span></div>
+        <span class="set-ico" data-i="download"></span>
+        <div class="set-txt"><b>البيانات</b><span class="m" id="set-lessons">—</span></div>
         <button id="set-lessons-update" class="btn secondary sm">تحديث</button>
       </div>
       <div class="set-row">
-        <div><b>السجل</b><span class="m" id="set-history">—</span></div>
+        <span class="set-ico" data-i="history"></span>
+        <div class="set-txt"><b>السجل</b><span class="m" id="set-history">—</span></div>
         <button id="set-history-clear" class="btn secondary sm">مسح</button>
       </div>
     </div>
-    <button id="set-key-remove" class="btn danger block">إزالة مفتاح التفعيل من هذا الجهاز</button>
+    <button id="set-key-remove" class="btn danger block"><span data-i="trash"></span>إزالة مفتاح التفعيل من هذا الجهاز</button>
     <p class="foot"><span id="ver">BacAI · الإصدار 1.0</span><br>تُرسل الصور مباشرة من جهازك إلى Google لمعالجتها.</p>
   </div>
 </div>
@@ -323,6 +680,7 @@ const MAX_IMAGES = 8;           // أقصى عدد صور في الطلب الو
 const MAX_SIDE = 1800;          // أكبر بُعد للصورة بعد الضغط
 const PARALLEL = 3;             // عدد التمارين التي تُحل معًا
 const RETRY_DELAYS = [3000, 8000];
+const TIMEOUT_MS = { read: 120000, select: 60000, solve: 120000 };
 
 /* ===================== البرومتات ===================== */
 const READ_SYSTEM = `أنت تقرأ صور موضوع امتحان (أو تمرين) في مادة العلوم الإسلامية. قد تحوي الصور موضوعاً كاملاً بعدة تمارين، أو تمريناً واحداً، أو جزءاً من صفحة.
@@ -427,6 +785,27 @@ const sleep = (ms, signal) => new Promise((res, rej) => {
   if (signal) signal.addEventListener('abort', () => { clearTimeout(t); rej(new DOMException('Aborted', 'AbortError')); }, { once: true });
 });
 
+/* مهلة لكل طلب + احترام إلغاء المستخدم، دون الاعتماد على AbortSignal.any */
+function withTimeout(outerSignal, ms) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ms);
+  const onAbort = () => ctl.abort();
+  if (outerSignal) {
+    if (outerSignal.aborted) ctl.abort();
+    else outerSignal.addEventListener('abort', onAbort, { once: true });
+  }
+  let done = false;
+  return {
+    signal: ctl.signal,
+    done() {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (outerSignal) outerSignal.removeEventListener('abort', onAbort);
+    }
+  };
+}
+
 const mem = {};
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v === null ? (d === undefined ? null : d) : v; } catch (e) { return k in mem ? mem[k] : (d === undefined ? null : d); } },
@@ -443,7 +822,12 @@ const ICONS = {
   check: '<path d="M5 12l5 5 9-10"/>',
   close: '<path d="M6 6l12 12M18 6L6 18"/>',
   book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h7M8 11h5"/>',
-  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>'
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+  key: '<circle cx="7" cy="12" r="3.5"/><path d="M10.5 12H20M17 12v3M20 12v2"/>',
+  download: '<path d="M12 4v10M8 11l4 4 4-4M5 19h14"/>',
+  trash: '<path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/>',
+  link: '<path d="M10 13a4 4 0 0 0 5.7 0l2.3-2.3A4 4 0 0 0 12.3 5L11 6.3"/><path d="M14 11a4 4 0 0 0-5.7 0L6 13.3A4 4 0 0 0 11.7 19l1.3-1.3"/>',
+  alert: '<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/>'
 };
 const icon = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ''}</svg>`;
 function injectIcons(root) {
@@ -467,7 +851,8 @@ function toast(msg, kind) {
   el.textContent = msg;
   el.className = 'toast show' + (kind === 'error' ? ' error' : '');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.className = 'toast'; }, 3200);
+  const ms = Math.max(2600, Math.min(9000, 1200 + String(msg).length * 55));
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, ms);
 }
 function openLink(url) {
   if (tg && tg.openLink) tg.openLink(url); else window.open(url, '_blank', 'noopener');
@@ -476,7 +861,7 @@ function applyTheme() {
   const scheme = tg && tg.colorScheme ? tg.colorScheme
     : (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
   document.documentElement.dataset.theme = scheme;
-  const c = scheme === 'light' ? '#f4f7fb' : '#0b1220';
+  const c = scheme === 'light' ? '#f6f8fc' : '#080d16';
   try { if (tg) { tg.setHeaderColor(c); tg.setBackgroundColor(c); } } catch (e) {}
 }
 async function copyText(text) {
@@ -496,27 +881,65 @@ function setBusy(btn, busy, label) {
 }
 
 /* ===================== الأخطاء ===================== */
-class AppError extends Error { constructor(code, detail) { super(detail || code); this.code = code; } }
+class AppError extends Error {
+  constructor(code, detail) { super(detail || code); this.code = code; this.detail = String(detail || ''); }
+}
 const MESSAGES = {
   NO_KEY: 'فعّل التطبيق أولاً بإدخال مفتاح التفعيل.',
   KEY_INVALID: 'مفتاح التفعيل غير مقبول. تأكد من نسخه كاملاً أو أنشئ مفتاحاً جديداً.',
-  RATE: 'الخدمة مشغولة حالياً أو بلغتَ الحد المسموح لمفتاحك. انتظر قليلاً ثم حاول مجدداً.',
-  SERVER: 'الخدمة غير متاحة مؤقتاً. حاول بعد قليل.',
+  QUOTA: 'بلغ مفتاحك الحد المجاني اليومي لطلبات Google، ويتجدد تلقائياً. يمكنك استعمال مفتاح آخر من الإعدادات.',
+  RATE: 'الخدمة مزدحمة الآن. انتظر نصف دقيقة ثم أعد المحاولة.',
+  OVERLOADED: 'خادم Google مزدحم حالياً (خطأ 503). لم تُفقد صورك؛ أعد المحاولة بعد دقيقة.',
+  SERVER: 'تعذّر على خدمة Google إكمال الطلب (خطأ من جهة الخدمة). أعد المحاولة بعد قليل.',
+  MODEL_MISSING: 'إصدار النموذج المستعمل غير متاح لهذا المفتاح. أبلغ مطوّر التطبيق.',
   NETWORK: 'تعذّر الاتصال بالإنترنت. تحقق من اتصالك وحاول مجدداً.',
-  EMPTY: 'لم يصل جواب واضح. أعد المحاولة.',
-  BLOCKED: 'تعذّرت معالجة هذا المحتوى. جرّب صورة أخرى.',
+  OFFLINE: 'لا يوجد اتصال بالإنترنت الآن. تحقق من الشبكة ثم أعد المحاولة.',
+  TIMEOUT: 'تأخّر رد Google أكثر من المتوقع. أعد المحاولة، وإن تكرر فقلّل عدد الصور.',
+  IMAGE: 'إحدى الصور كبيرة جداً أو غير مقبولة. جرّب صوراً أقل أو أصغر.',
+  EMPTY: 'لم يصل جواب واضح من الخدمة. أعد المحاولة.',
+  BLOCKED: 'تعذّرت معالجة هذا المحتوى. جرّب صورة أخرى أو أوضح.',
   BAD: 'تعذّرت معالجة الطلب. جرّب صوراً أوضح.',
   READ: 'لم أستطع قراءة الصور بوضوح. التقط صورة أوضح وأكثر إضاءة.'
 };
-const friendly = e => MESSAGES[e && e.code] || 'حدث خطأ غير متوقع. حاول مرة أخرى.';
-
+function friendly(e) {
+  const code = e && e.code;
+  let msg = MESSAGES[code] || 'حدث خطأ غير متوقع. حاول مرة أخرى.';
+  if (DEV) msg += ` [${code || 'ERR'}${e && e.detail ? ': ' + e.detail.slice(0, 90) : ''}]`;
+  return msg;
+}
+function quotaIds(body) {
+  const out = [];
+  try {
+    const det = body && body.error && body.error.details;
+    if (Array.isArray(det)) for (const d of det) {
+      const vs = d && (d.violations || (d.quotaFailure && d.quotaFailure.violations));
+      if (Array.isArray(vs)) for (const v of vs) out.push(String((v && (v.quotaId || v.quotaMetric)) || ''));
+    }
+  } catch (e) {}
+  return out.join(' ').toLowerCase();
+}
 async function httpError(res) {
-  let msg = '';
-  try { const j = await res.json(); msg = ((j.error && j.error.message) || '') + ' ' + ((j.error && j.error.status) || ''); } catch (e) {}
+  let body = null, msg = '';
+  try { body = await res.json(); } catch (e) {}
+  if (body && body.error) msg = String(body.error.message || '') + ' ' + String(body.error.status || '');
   const m = msg.toLowerCase();
-  if (res.status === 401 || res.status === 403 || (res.status === 400 && (m.includes('api key') || m.includes('api_key')))) return new AppError('KEY_INVALID', msg);
-  if (res.status === 429) return new AppError('RATE', msg);
+  try { console.warn('[BacAI] http', res.status, body || msg); } catch (e) {}
+
+  if (res.status === 401 || res.status === 403 ||
+      (res.status === 400 && (m.includes('api key') || m.includes('api_key') || m.includes('unauthenticated'))))
+    return new AppError('KEY_INVALID', msg);
+  if (res.status === 404) return new AppError('MODEL_MISSING', msg);
+  if (res.status === 429) {
+    // حد يومي منتهٍ لا يُعاد، بخلاف ازدحام اللحظة
+    const perDay = /per_?day|daily/.test(quotaIds(body) + ' ' + m);
+    return new AppError(perDay ? 'QUOTA' : 'RATE', msg);
+  }
+  if (res.status === 503 || res.status === 502 || res.status === 504) return new AppError('OVERLOADED', msg);
   if (res.status >= 500) return new AppError('SERVER', msg);
+  if (res.status === 400) {
+    if (/size|too large|payload|inline.?data|image|media/.test(m)) return new AppError('IMAGE', msg);
+    if (/safety|blocked|prohibited|recitation|blocklist/.test(m)) return new AppError('BLOCKED', msg);
+  }
   return new AppError('BAD', msg);
 }
 
@@ -534,11 +957,16 @@ function record(stage, data) {
   usage[stage].calls++;
 }
 function extractText(data) {
-  if (data.promptFeedback && data.promptFeedback.blockReason) throw new AppError('BLOCKED');
+  if (data.promptFeedback && data.promptFeedback.blockReason)
+    throw new AppError('BLOCKED', data.promptFeedback.blockReason);
   const c = data.candidates && data.candidates[0];
   if (!c || !c.content || !c.content.parts) return '';
   const text = c.content.parts.filter(p => !p.thought && typeof p.text === 'string').map(p => p.text).join('').trim();
-  if (!text && c.finishReason === 'SAFETY') throw new AppError('BLOCKED');
+  if (!text && c.finishReason) {
+    if (['SAFETY', 'PROHIBITED_CONTENT', 'RECITATION', 'BLOCKLIST'].includes(c.finishReason))
+      throw new AppError('BLOCKED', c.finishReason);
+    if (c.finishReason === 'MAX_TOKENS') throw new AppError('EMPTY', 'MAX_TOKENS');
+  }
   return text;
 }
 async function callModel({ system, parts, json, stage, signal }) {
@@ -548,12 +976,13 @@ async function callModel({ system, parts, json, stage, signal }) {
   if (json) body.generationConfig = { responseMimeType: 'application/json' };
   let lastErr;
   for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+    const guard = withTimeout(signal, TIMEOUT_MS[stage] || 120000);
     try {
       const res = await fetch(endpoint(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
         body: JSON.stringify(body),
-        signal
+        signal: guard.signal
       });
       if (!res.ok) throw await httpError(res);
       const data = await res.json();
@@ -562,29 +991,46 @@ async function callModel({ system, parts, json, stage, signal }) {
       if (!text) throw new AppError('EMPTY');
       return text;
     } catch (e) {
-      if (e && e.name === 'AbortError') throw e;
-      lastErr = e instanceof AppError ? e : new AppError('NETWORK', e && e.message);
-      const retryable = ['RATE', 'SERVER', 'NETWORK', 'EMPTY'].includes(lastErr.code);
+      guard.done();
+      if (e && e.name === 'AbortError') {
+        if (signal && signal.aborted) throw e;                    // إلغاء المستخدم
+        lastErr = new AppError('TIMEOUT', 'no response');         // مهلة ضربناها نحن
+      } else if (e instanceof AppError) {
+        lastErr = e;
+      } else {
+        lastErr = new AppError(navigator.onLine === false ? 'OFFLINE' : 'NETWORK', e && e.message);
+      }
+      if (['OFFLINE', 'QUOTA', 'KEY_INVALID', 'MODEL_MISSING', 'NO_KEY', 'IMAGE', 'BLOCKED'].includes(lastErr.code)) throw lastErr;
+      const retryable = ['RATE', 'OVERLOADED', 'SERVER', 'NETWORK', 'TIMEOUT', 'EMPTY'].includes(lastErr.code);
       if (!retryable || attempt === RETRY_DELAYS.length) throw lastErr;
       await sleep(RETRY_DELAYS[attempt], signal);
+    } finally {
+      guard.done();
     }
   }
   throw lastErr;
 }
 async function validateKey(key) {
+  const guard = withTimeout(undefined, 20000);
   let res;
   try {
     res = await fetch(endpoint(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'ok' }] }], generationConfig: { maxOutputTokens: 8 } })
+      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'ok' }] }], generationConfig: { maxOutputTokens: 8 } }),
+      signal: guard.signal
     });
-  } catch (e) { throw new AppError('NETWORK'); }
+  } catch (e) {
+    guard.done();
+    if (e && e.name === 'AbortError') throw new AppError('TIMEOUT');
+    throw new AppError(navigator.onLine === false ? 'OFFLINE' : 'NETWORK');
+  }
+  guard.done();
   if (res.ok || res.status === 429) return true;
   throw await httpError(res);
 }
 
-/* ===================== الدروس ===================== */
+/* ===================== البيانات ===================== */
 let LESSONS = [];
 let catalogText = '';
 function buildCatalog() {
@@ -718,8 +1164,8 @@ function renderSettings() {
   const k = getKey();
   $('#set-key').textContent = k ? 'مفعّل · ••••' + k.slice(-4) : 'غير مفعّل';
   $('#set-key-remove').classList.toggle('hidden', !k);
-  $('#set-lessons').textContent = LESSONS.length
-    ? `${LESSONS.length} درساً · الإصدار ${store.get('lessons_version', '—')}` : 'غير محمّلة';
+  const v = store.get('lessons_version', '—');
+  $('#set-lessons').textContent = (LESSONS.length ? 'محمّلة' : 'غير محمّلة') + (DEV && LESSONS.length ? ` · ${v}` : '');
   $('#set-history').textContent = `${loadHistory().length} موضوعاً محفوظاً`;
 }
 
@@ -757,7 +1203,7 @@ function renderHistory() {
 /* ===================== الحل ===================== */
 function cardHtml(item, idx) {
   const badge = item.status === 'general'
-    ? '<div class="badge">لم يُعثر على درس مطابق لهذا التمرين، فالإجابة عامة وتحتاج إلى مراجعتك.</div>' : '';
+    ? '<div class="badge">لم يُعثر على مرجع مطابق لهذا التمرين، فالإجابة عامة وتحتاج إلى مراجعتك.</div>' : '';
   let body;
   if (item.status === 'error') {
     body = `<div class="err-box">${escapeHtml(item.error || 'تعذّر حل هذا التمرين.')}</div>` +
@@ -827,10 +1273,10 @@ async function run() {
   if (working || !images.length) return;
   if (!getKey()) { openSheet('key'); return; }
   if (!LESSONS.length) {
-    toast('جارٍ تحميل الدروس…');
+    toast('جارٍ تحميل البيانات…');
     try { await syncLessons(true); } catch (e) {}
     refreshHome();
-    if (!LESSONS.length) { toast('تعذّر تحميل الدروس. تحقق من الاتصال.', 'error'); return; }
+    if (!LESSONS.length) { toast('تعذّر تحميل البيانات. تحقق من الاتصال.', 'error'); return; }
   }
   working = true;
   abortCtl = new AbortController();
@@ -873,6 +1319,7 @@ async function run() {
     show('result');
     hap(items.every(i => i.status !== 'error') ? 'success' : 'warning');
   } catch (e) {
+    try { if (abortCtl) abortCtl.abort(); } catch (_) {}
     show('home');
     if (e && e.name === 'AbortError') toast('تم الإلغاء');
     else {
@@ -889,7 +1336,8 @@ async function retryOne(idx, btn) {
   const it = lastResult.items[idx];
   if (!it || !it.text) return;
   setBusy(btn, true, 'جارٍ الحل…');
-  usage = lastResult.usage || newUsage();
+  if (!lastResult.usage) lastResult.usage = newUsage();
+  usage = lastResult.usage;
   try {
     lastResult.items[idx] = await solveOne({ label: it.label, text: it.text }, undefined);
   } catch (e) { toast(friendly(e), 'error'); }
@@ -951,12 +1399,12 @@ function bindUI() {
   $('#set-history-clear').onclick = () => { store.del('bacai_history'); renderSettings(); toast('تم مسح السجل'); };
   $('#set-lessons-update').onclick = async e => {
     const b = e.currentTarget; setBusy(b, true, '…');
-    try { await syncLessons(true); toast('الدروس محدّثة'); } catch (err) { toast('تعذّر تحديث الدروس. تحقق من الاتصال.', 'error'); }
+    try { await syncLessons(true); toast('تم تحديث البيانات'); } catch (err) { toast('تعذّر تحديث البيانات. تحقق من الاتصال.', 'error'); }
     setBusy(b, false); renderSettings(); refreshHome();
   };
   $('#banner-lessons-btn').onclick = async e => {
     const b = e.currentTarget; setBusy(b, true, '…');
-    try { await syncLessons(true); toast('تم تحميل الدروس'); } catch (err) { toast('تعذّر تحميل الدروس. تحقق من الاتصال.', 'error'); }
+    try { await syncLessons(true); toast('تم تحميل البيانات'); } catch (err) { toast('تعذّر تحميل البيانات. تحقق من الاتصال.', 'error'); }
     setBusy(b, false); refreshHome();
   };
 
@@ -1016,7 +1464,7 @@ async function boot() {
   loadCachedLessons();
   const hadCache = LESSONS.length > 0;
   if (!hadCache) {
-    $('#splash-text').textContent = 'جارٍ تحميل الدروس…';
+    $('#splash-text').textContent = 'جارٍ تحميل البيانات…';
     try { await syncLessons(false); } catch (e) {}
   }
   $('#splash').classList.add('hidden');
@@ -1024,7 +1472,7 @@ async function boot() {
   show('home'); renderThumbs(); refreshHome();
   if (!getKey()) openSheet('key');
   if (hadCache) {
-    syncLessons(false).then(updated => { if (updated) toast('تم تحديث الدروس'); refreshHome(); }).catch(() => {});
+    syncLessons(false).then(updated => { if (updated) toast('تم تحديث البيانات'); refreshHome(); }).catch(() => {});
   }
 }
 boot();
@@ -1032,4 +1480,4 @@ boot();
 })();
 </script>
 </body>
-</html>
+  </html>
